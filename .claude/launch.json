@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "solarpak-kpi",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "client"],
+      "port": 3000
+    }
+  ]
+}
