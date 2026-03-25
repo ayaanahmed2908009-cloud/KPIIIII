@@ -32,8 +32,8 @@ export const SEED_ENTRIES = [
     inputs: {
       postsPublished: 3,
       videosPublished: 1,
-      netFollowerGain: 22,
-      totalFollowers: 189,
+      netFollowerGain: 57,
+      totalFollowers: 1790,
       avgEngagementRate: 2.7,
       pressContactsReached: 1,
       pressMentionsConfirmed: 0,
@@ -47,8 +47,8 @@ export const SEED_ENTRIES = [
     inputs: {
       postsPublished: 4,
       videosPublished: 2,
-      netFollowerGain: 31,
-      totalFollowers: 220,
+      netFollowerGain: 57,
+      totalFollowers: 1847,
       avgEngagementRate: 3.1,
       pressContactsReached: 3,
       pressMentionsConfirmed: 1,

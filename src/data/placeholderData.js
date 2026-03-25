@@ -3,14 +3,14 @@
 
 export const PLACEHOLDER = {
   marketing: [
-    { week: 1, followers: 220, engagementRate: 3.2, posts: 3, videos: 1, pressContacts: 2, pressMentions: 0, cumulativeMentions: 0 },
-    { week: 2, followers: 265, engagementRate: 2.8, posts: 4, videos: 2, pressContacts: 3, pressMentions: 0, cumulativeMentions: 0 },
-    { week: 3, followers: 312, engagementRate: 3.5, posts: 3, videos: 1, pressContacts: 2, pressMentions: 1, cumulativeMentions: 1 },
-    { week: 4, followers: 348, engagementRate: 3.1, posts: 5, videos: 2, pressContacts: 4, pressMentions: 0, cumulativeMentions: 1 },
-    { week: 5, followers: 395, engagementRate: 2.9, posts: 4, videos: 2, pressContacts: 3, pressMentions: 0, cumulativeMentions: 1 },
-    { week: 6, followers: 423, engagementRate: 3.4, posts: 3, videos: 1, pressContacts: 2, pressMentions: 1, cumulativeMentions: 2 },
-    { week: 7, followers: 458, engagementRate: 3.7, posts: 4, videos: 2, pressContacts: 5, pressMentions: 0, cumulativeMentions: 2 },
-    { week: 8, followers: 492, engagementRate: 3.3, posts: 4, videos: 2, pressContacts: 3, pressMentions: 0, cumulativeMentions: 2 },
+    { week: 1, followers: 1650, engagementRate: 3.2, posts: 3, videos: 1, pressContacts: 2, pressMentions: 0, cumulativeMentions: 0 },
+    { week: 2, followers: 1690, engagementRate: 2.8, posts: 4, videos: 2, pressContacts: 3, pressMentions: 0, cumulativeMentions: 0 },
+    { week: 3, followers: 1720, engagementRate: 3.5, posts: 3, videos: 1, pressContacts: 2, pressMentions: 1, cumulativeMentions: 1 },
+    { week: 4, followers: 1750, engagementRate: 3.1, posts: 5, videos: 2, pressContacts: 4, pressMentions: 0, cumulativeMentions: 1 },
+    { week: 5, followers: 1775, engagementRate: 2.9, posts: 4, videos: 2, pressContacts: 3, pressMentions: 0, cumulativeMentions: 1 },
+    { week: 6, followers: 1800, engagementRate: 3.4, posts: 3, videos: 1, pressContacts: 2, pressMentions: 1, cumulativeMentions: 2 },
+    { week: 7, followers: 1825, engagementRate: 3.7, posts: 4, videos: 2, pressContacts: 5, pressMentions: 0, cumulativeMentions: 2 },
+    { week: 8, followers: 1847, engagementRate: 3.3, posts: 4, videos: 2, pressContacts: 3, pressMentions: 0, cumulativeMentions: 2 },
   ],
   sponsorships: [
     { week: 1, meetings: 2, prospectsOutreach: 5, prospectsMeeting: 1, newPartnerships: 0, totalPartners: 0, fundsWeek: 0,    fundsYTD: 0 },
