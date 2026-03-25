@@ -1,16 +1,16 @@
 import React from 'react';
 import {
-  BarChart, Bar, LineChart, Line, AreaChart, Area, ScatterChart, Scatter,
+  BarChart, Bar, LineChart, Line, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, ReferenceLine, ComposedChart, Cell
 } from 'recharts';
-import { ChartCard, DarkTooltip, AIInsightBox, StatPill, CHART_DEFAULTS } from './ChartShared';
-import { PLACEHOLDER, pacePoint, hasEnoughData, extractTeamData } from '../../data/placeholderData';
+import { ChartCard, DarkTooltip, AIInsightBox, StatPill, CHART_DEFAULTS, EmptyChartState } from './ChartShared';
+import { pacePoint, hasEnoughData, extractTeamData } from '../../data/placeholderData';
 
 const COLOR = '#EC4899';
 
 function buildData(history) {
-  if (!hasEnoughData(history, 'events')) return { data: PLACEHOLDER.events, isPlaceholder: true };
+  if (!hasEnoughData(history, 'events')) return { data: [], isEmpty: true };
   const raw = extractTeamData(history, 'events');
   const data = raw.map(e => ({
     week: e.weekNumber,
@@ -24,25 +24,24 @@ function buildData(history) {
     volunteers: e.inputs.volunteersEngaged || 0,
     schoolsReached: e.inputs.schoolsReachedYTD || 0,
   }));
-  return { data, isPlaceholder: false };
+  return { data, isEmpty: false };
 }
 
 // 1 — Event Calendar Heatmap
 export function EventCalendarHeatmap({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Event Activity Heatmap" subtitle="Each cell = one week · colour intensity = events held" color={COLOR}><EmptyChartState /></ChartCard>;
+
   const totalEvents = data.reduce((s, d) => s + d.eventsHeld, 0);
   const activeWeeks = data.filter(d => d.eventsHeld > 0).length;
   const maxEvents = Math.max(...data.map(d => d.eventsHeld), 1);
 
   return (
-    <ChartCard title="Event Activity Heatmap" subtitle="Each cell = one week · colour intensity = events held" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Event Activity Heatmap" subtitle="Each cell = one week · colour intensity = events held" color={COLOR}
       insight={`${totalEvents} events held across ${data.length} weeks (${activeWeeks} active weeks). Target: 15/year. ${totalEvents >= 15 ? '✓ Annual target met!' : `${15 - totalEvents} more needed.`}`}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px' }}>
         {data.map((d, i) => {
           const intensity = d.eventsHeld / maxEvents;
-          const bg = d.eventsHeld === 0 ? '#0f172a'
-            : d.eventsHeld >= 2 ? '#be185d'
-            : '#9d174d';
           const opacity = d.eventsHeld === 0 ? 1 : 0.3 + intensity * 0.7;
           return (
             <div key={i} title={`Week ${d.week}: ${d.eventsHeld} event(s)`} style={{
@@ -79,7 +78,9 @@ export function EventCalendarHeatmap({ history }) {
 
 // 2 — Attendee Tracker (cumulative + weekly)
 export function AttendeeTrackerChart({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Attendee Tracker — Weekly & Cumulative" subtitle="Bars = weekly attendance · line = cumulative · dashed = pace to 500" color={COLOR}><EmptyChartState /></ChartCard>;
+
   let cumAttendees = 0;
   const chartData = data.map(d => {
     cumAttendees += d.attendees;
@@ -89,7 +90,7 @@ export function AttendeeTrackerChart({ history }) {
   const weeklyAvg = data.length > 0 ? Math.round(data.reduce((s, d) => s + d.attendees, 0) / data.length) : 0;
 
   return (
-    <ChartCard title="Attendee Tracker — Weekly & Cumulative" subtitle="Bars = weekly attendance · line = cumulative · dashed = pace to 500" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Attendee Tracker — Weekly & Cumulative" subtitle="Bars = weekly attendance · line = cumulative · dashed = pace to 500" color={COLOR}
       insight={`${latest?.cumAttendees || 0} total attendees YTD (target: 500). Avg ${weeklyAvg}/event-week. ${latest?.cumAttendees >= 500 ? '✓ Target met!' : `${500 - (latest?.cumAttendees || 0)} attendees still needed.`}`}>
       <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
         <StatPill label="Total YTD" value={(latest?.cumAttendees || 0).toLocaleString()} color={COLOR} />
@@ -116,7 +117,9 @@ export function AttendeeTrackerChart({ history }) {
 
 // 3 — Satisfaction Dot Plot
 export function SatisfactionDotPlot({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Attendee Satisfaction Score" subtitle="Score per event week · bubble size = attendee count · ≥85% target" color={COLOR}><EmptyChartState /></ChartCard>;
+
   const satisfactionData = data.filter(d => d.satisfaction > 0).map(d => ({
     week: d.week,
     satisfaction: d.satisfaction,
@@ -128,14 +131,12 @@ export function SatisfactionDotPlot({ history }) {
   const onTarget = avg >= 85;
 
   return (
-    <ChartCard title="Attendee Satisfaction Score" subtitle="Score per event week · bubble size = attendee count · ≥85% target" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Attendee Satisfaction Score" subtitle="Score per event week · bubble size = attendee count · ≥85% target" color={COLOR}
       insight={satisfactionData.length > 0
         ? `Average satisfaction: ${avg}% across ${satisfactionData.length} events. ${onTarget ? '✓ Above 85% target.' : `⚠ ${(85 - avg).toFixed(1)} points below target.`} ${satisfactionData.filter(d => d.satisfaction >= 85).length}/${satisfactionData.length} events met threshold.`
         : 'No satisfaction data yet. Enter scores after each event.'}>
       {satisfactionData.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#475569', fontSize: '13px' }}>
-          No satisfaction scores entered yet.
-        </div>
+        <EmptyChartState message="Enter satisfaction scores after each event" />
       ) : (
         <>
           <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
@@ -162,7 +163,9 @@ export function SatisfactionDotPlot({ history }) {
 
 // 4 — Repeat Attendee Gauge + Schools Reached
 export function RepeatAttendeeGauge({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Repeat Attendance & Schools Reached" subtitle="Repeat attendee % + cumulative schools engaged YTD" color={COLOR}><EmptyChartState /></ChartCard>;
+
   const latestRepeat = data.filter(d => d.repeatPct > 0);
   const latest = latestRepeat[latestRepeat.length - 1];
   const repeatPct = latest?.repeatPct || 0;
@@ -176,10 +179,9 @@ export function RepeatAttendeeGauge({ history }) {
   }));
 
   return (
-    <ChartCard title="Repeat Attendance & Schools Reached" subtitle="Repeat attendee % + cumulative schools engaged YTD" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Repeat Attendance & Schools Reached" subtitle="Repeat attendee % + cumulative schools engaged YTD" color={COLOR}
       insight={`${repeatPct}% repeat attendee rate (target: 30%). ${schoolsReached} schools reached YTD (target: 5). ${repeatPct >= 30 ? '✓ Loyalty target met.' : `Build loyalty — ${(30 - repeatPct).toFixed(0)}% more repeat attendees needed.`}`}>
       <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
-        {/* Repeat gauge */}
         <div style={{ flex: 1, background: '#0f172a', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
           <div style={{ fontSize: '11px', color: '#475569', marginBottom: '8px' }}>Repeat Attendees</div>
           <div style={{ position: 'relative', height: '12px', background: '#1e293b', borderRadius: '6px', overflow: 'hidden', marginBottom: '6px' }}>
@@ -189,7 +191,6 @@ export function RepeatAttendeeGauge({ history }) {
           <div style={{ fontSize: '22px', fontWeight: '800', color }}>{repeatPct}%</div>
           <div style={{ fontSize: '10px', color: '#475569' }}>target: 30%</div>
         </div>
-        {/* Schools gauge */}
         <div style={{ flex: 1, background: '#0f172a', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
           <div style={{ fontSize: '11px', color: '#475569', marginBottom: '8px' }}>Schools Reached</div>
           <div style={{ position: 'relative', height: '12px', background: '#1e293b', borderRadius: '6px', overflow: 'hidden', marginBottom: '6px' }}>
@@ -216,7 +217,9 @@ export function RepeatAttendeeGauge({ history }) {
 
 // 5 — Event Sponsor & Volunteer Pipeline
 export function SponsorVolunteerChart({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Event Sponsors & Volunteers" subtitle="Weekly volunteer engagement + cumulative sponsor count" color={COLOR}><EmptyChartState /></ChartCard>;
+
   let cumSponsors = 0;
   const chartData = data.map(d => {
     cumSponsors += d.sponsors;
@@ -232,7 +235,7 @@ export function SponsorVolunteerChart({ history }) {
   const healthColor = health === 'Strong' ? '#34d399' : health === 'Building' ? '#fbbf24' : '#f87171';
 
   return (
-    <ChartCard title="Event Sponsors & Volunteers" subtitle="Weekly volunteer engagement + cumulative sponsor count" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Event Sponsors & Volunteers" subtitle="Weekly volunteer engagement + cumulative sponsor count" color={COLOR}
       insight={`${totalSponsors} event sponsors secured YTD (target: 2). ${latestVolunteers} volunteers this week · ${totalVolunteers} total volunteer-weeks. ${totalSponsors >= 2 ? '✓ Sponsor target met!' : `${2 - totalSponsors} more sponsors needed.`}`}>
       <div style={{
         background: healthColor + '15', border: `1px solid ${healthColor}40`,

@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip, ReferenceLine, Cell
+  ResponsiveContainer
 } from 'recharts';
-import { DarkTooltip } from './ChartShared';
-import { PLACEHOLDER, hasEnoughData } from '../../data/placeholderData';
+import { EmptyChartState } from './ChartShared';
 
 const TEAM_COLORS = {
   marketing: '#3B82F6',
@@ -22,20 +20,6 @@ const TEAM_LABELS = {
   impactLabs: 'Impact Labs',
   events: 'Events',
 };
-
-// Derives a simple heuristic probability for each team from latest input data
-function deriveTeamProb(history, teamKey) {
-  // If we have AI analysis, don't use this — it's for placeholder mode
-  // This gives a rough score 0-100 from available inputs
-  const SCORES = {
-    marketing: 62,
-    sponsorships: 48,
-    generalManagement: 74,
-    impactLabs: 57,
-    events: 69,
-  };
-  return SCORES[teamKey];
-}
 
 function getCompositeProb(analysisHistory) {
   if (!analysisHistory || analysisHistory.length === 0) return null;
@@ -59,38 +43,45 @@ function getTeamProbs(analysisHistory) {
   return result;
 }
 
-const PLACEHOLDER_PROBS = {
-  marketing: 62,
-  sponsorships: 48,
-  generalManagement: 74,
-  impactLabs: 57,
-  events: 69,
-};
-
 export function AIConfidenceBriefing({ history, analysisHistory }) {
   const [expanded, setExpanded] = useState(false);
 
   const aiProbs = getTeamProbs(analysisHistory);
   const compositeFromAI = getCompositeProb(analysisHistory);
-  const isPlaceholder = compositeFromAI === null;
 
-  const probs = isPlaceholder ? PLACEHOLDER_PROBS : aiProbs;
-  const composite = isPlaceholder
-    ? Math.round(Object.values(PLACEHOLDER_PROBS).reduce((s, v) => s + v, 0) / 5)
-    : compositeFromAI;
+  // No AI analysis run yet — show empty state
+  if (compositeFromAI === null) {
+    return (
+      <div style={{
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
+        border: '1px solid #6366f1',
+        borderTop: '4px solid #6366f1',
+        borderRadius: '14px',
+        padding: '24px',
+        marginBottom: '28px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+          <span style={{ fontSize: '16px', fontWeight: '800', color: '#f1f5f9' }}>AI Overall Confidence Briefing</span>
+          <span style={{ fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '999px', background: '#1e3a5f', color: '#60a5fa' }}>
+            🤖 AI
+          </span>
+        </div>
+        <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '16px' }}>
+          Composite target achievement probability across all 5 SolarPak teams
+        </div>
+        <EmptyChartState message="Run AI Analysis to generate your executive confidence briefing" />
+      </div>
+    );
+  }
 
+  const probs = aiProbs;
+  const composite = compositeFromAI;
   const teams = ['marketing', 'sponsorships', 'generalManagement', 'impactLabs', 'events'];
 
   const radarData = teams.map(t => ({
     team: TEAM_LABELS[t],
     probability: probs?.[t] ?? 0,
     fullMark: 100,
-  }));
-
-  const barData = teams.map(t => ({
-    team: TEAM_LABELS[t].replace(' Mgmt', '\nMgmt'),
-    probability: probs?.[t] ?? 0,
-    color: TEAM_COLORS[t],
   }));
 
   const compositeColor = composite >= 70 ? '#34d399' : composite >= 50 ? '#fbbf24' : '#f87171';
@@ -100,7 +91,6 @@ export function AIConfidenceBriefing({ history, analysisHistory }) {
   const weakTeams = teams.filter(t => (probs?.[t] ?? 0) < 50);
   const strongTeams = teams.filter(t => (probs?.[t] ?? 0) >= 70);
 
-  // Dial SVG
   const dialPct = composite / 100;
   const dialAngle = dialPct * 180 - 90;
   const dialRad = (dialAngle * Math.PI) / 180;
@@ -138,11 +128,6 @@ export function AIConfidenceBriefing({ history, analysisHistory }) {
             <span style={{ fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '999px', background: '#1e3a5f', color: '#60a5fa' }}>
               🤖 AI
             </span>
-            {isPlaceholder && (
-              <span style={{ fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '999px', background: '#1c1917', color: '#a8a29e' }}>
-                SAMPLE
-              </span>
-            )}
           </div>
           <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
             Composite target achievement probability across all 5 SolarPak teams
@@ -215,10 +200,7 @@ export function AIConfidenceBriefing({ history, analysisHistory }) {
           🤖 Executive Briefing · {verdict}
         </div>
         <div style={{ fontSize: '12px', color: '#94a3b8', lineHeight: '1.6' }}>
-          {isPlaceholder
-            ? `Based on sample data, SolarPak's composite target achievement probability is ${composite}%. ${weakTeams.length > 0 ? `Teams at risk: ${weakTeams.map(t => TEAM_LABELS[t]).join(', ')} — require immediate attention.` : 'All teams are performing above the 50% threshold.'} ${strongTeams.length > 0 ? `Strongest performers: ${strongTeams.map(t => TEAM_LABELS[t]).join(', ')}.` : ''} Run AI Analysis with real weekly data to generate a live briefing.`
-            : `Based on this week's inputs, SolarPak's cumulative probability of meeting all Year 1 targets is ${composite}%. ${weakTeams.length > 0 ? `⚠ ${weakTeams.map(t => TEAM_LABELS[t]).join(' and ')} ${weakTeams.length === 1 ? 'is' : 'are'} below 50% — escalate to leadership immediately.` : '✓ All teams are above the 50% risk threshold.'} ${strongTeams.length > 0 ? `${strongTeams.map(t => TEAM_LABELS[t]).join(' and ')} ${strongTeams.length === 1 ? 'is' : 'are'} leading the organisation at ≥70%.` : ''}`
-          }
+          Based on this week's inputs, SolarPak's cumulative probability of meeting all Year 1 targets is {composite}%. {weakTeams.length > 0 ? `⚠ ${weakTeams.map(t => TEAM_LABELS[t]).join(' and ')} ${weakTeams.length === 1 ? 'is' : 'are'} below 50% — escalate to leadership immediately.` : '✓ All teams are above the 50% risk threshold.'} {strongTeams.length > 0 ? `${strongTeams.map(t => TEAM_LABELS[t]).join(' and ')} ${strongTeams.length === 1 ? 'is' : 'are'} leading the organisation at ≥70%.` : ''}
         </div>
       </div>
 

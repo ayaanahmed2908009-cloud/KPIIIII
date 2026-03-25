@@ -1,7 +1,23 @@
 import React from 'react';
 
+// ─── Empty state shown when no real data has been submitted ────────────────────
+export function EmptyChartState({ message = 'Submit weekly inputs to unlock this chart' }) {
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      padding: '32px 16px', gap: '10px', minHeight: '140px'
+    }}>
+      <div style={{ fontSize: '28px', opacity: 0.3 }}>📊</div>
+      <div style={{ fontSize: '13px', fontWeight: '600', color: '#475569' }}>No data yet</div>
+      <div style={{ fontSize: '11px', color: '#334155', textAlign: 'center', maxWidth: '200px', lineHeight: 1.5 }}>
+        {message}
+      </div>
+    </div>
+  );
+}
+
 // ─── Shared chart card wrapper ─────────────────────────────────────────────────
-export function ChartCard({ title, subtitle, isPlaceholder, isAI, insight, children, color }) {
+export function ChartCard({ title, subtitle, isAI, insight, children, color }) {
   return (
     <div style={{
       background: '#1e293b',
@@ -18,18 +34,11 @@ export function ChartCard({ title, subtitle, isPlaceholder, isAI, insight, child
           <div style={{ fontSize: '13px', fontWeight: '700', color: '#f1f5f9', lineHeight: 1.3 }}>{title}</div>
           {subtitle && <div style={{ fontSize: '11px', color: '#475569', marginTop: '3px' }}>{subtitle}</div>}
         </div>
-        <div style={{ display: 'flex', gap: '6px', flexShrink: 0, marginLeft: '10px' }}>
-          {isAI && (
-            <span style={{ fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '999px', background: '#1e3a5f', color: '#60a5fa' }}>
-              🤖 AI
-            </span>
-          )}
-          {isPlaceholder && (
-            <span style={{ fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '999px', background: '#1c1917', color: '#a8a29e' }}>
-              SAMPLE
-            </span>
-          )}
-        </div>
+        {isAI && (
+          <span style={{ fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '999px', background: '#1e3a5f', color: '#60a5fa', flexShrink: 0, marginLeft: '10px' }}>
+            🤖 AI
+          </span>
+        )}
       </div>
       {children}
       {insight && (

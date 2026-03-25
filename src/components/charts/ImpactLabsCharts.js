@@ -4,13 +4,13 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, ReferenceLine
 } from 'recharts';
-import { ChartCard, DarkTooltip, AIInsightBox, StatPill, CHART_DEFAULTS } from './ChartShared';
-import { PLACEHOLDER, pacePoint, hasEnoughData, extractTeamData } from '../../data/placeholderData';
+import { ChartCard, DarkTooltip, AIInsightBox, StatPill, CHART_DEFAULTS, EmptyChartState } from './ChartShared';
+import { pacePoint, hasEnoughData, extractTeamData } from '../../data/placeholderData';
 
 const COLOR = '#F59E0B';
 
 function buildData(history) {
-  if (!hasEnoughData(history, 'impactLabs')) return { data: PLACEHOLDER.impactLabs, isPlaceholder: true };
+  if (!hasEnoughData(history, 'impactLabs')) return { data: [], isEmpty: true };
   const raw = extractTeamData(history, 'impactLabs');
   const data = raw.map(e => ({
     week: e.weekNumber,
@@ -26,12 +26,14 @@ function buildData(history) {
     submitted: e.inputs.findingsSubmittedExternally || 0,
     reportPct: e.inputs.annualReportPercentComplete || 0,
   }));
-  return { data, isPlaceholder: false };
+  return { data, isEmpty: false };
 }
 
 // 1 — Article Production Pipeline
 export function ArticlePipelineChart({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Article Production Pipeline" subtitle="Live stage snapshot — articles currently in each phase" color={COLOR}><EmptyChartState /></ChartCard>;
+
   const latest = data[data.length - 1];
   const stages = [
     { label: 'Research', value: latest?.research || 0, color: '#60a5fa', icon: '🔍' },
@@ -42,7 +44,7 @@ export function ArticlePipelineChart({ history }) {
   const inProgress = (latest?.research || 0) + (latest?.draft || 0) + (latest?.review || 0);
 
   return (
-    <ChartCard title="Article Production Pipeline" subtitle="Live stage snapshot — articles currently in each phase" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Article Production Pipeline" subtitle="Live stage snapshot — articles currently in each phase" color={COLOR}
       insight={`${inProgress} articles in progress · ${latest?.publishedYTD || 0}/8 published YTD (target). ${8 - (latest?.publishedYTD || 0)} more needed.`}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
         {stages.map((s, i) => (
@@ -85,14 +87,16 @@ export function ArticlePipelineChart({ history }) {
 
 // 2 — Publication Pace vs. Target
 export function PublicationPaceChart({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Publication Pace vs. Annual Target" subtitle="Cumulative articles published (step) · dashed = required pace to hit 8" color={COLOR}><EmptyChartState /></ChartCard>;
+
   const chartData = data.map(d => ({ ...d, pace: pacePoint(d.week, 8) }));
   const latest = data[data.length - 1];
   const weeklyRate = latest?.publishedYTD && data.length > 0 ? (latest.publishedYTD / data.length).toFixed(2) : 0;
   const projectedByWeek52 = parseFloat((weeklyRate * 52).toFixed(0));
 
   return (
-    <ChartCard title="Publication Pace vs. Annual Target" subtitle="Cumulative articles published (step) · dashed = required pace to hit 8" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Publication Pace vs. Annual Target" subtitle="Cumulative articles published (step) · dashed = required pace to hit 8" color={COLOR}
       insight={`${latest?.publishedYTD || 0}/8 articles published. At current rate (${weeklyRate}/week), projected year-end total: ${projectedByWeek52}. ${projectedByWeek52 >= 8 ? '✓ On track.' : `⚠ ${8 - projectedByWeek52} short of target.`}`}>
       <ResponsiveContainer width="100%" height={190}>
         <ComposedChart data={chartData} margin={CHART_DEFAULTS.margin}>
@@ -112,21 +116,21 @@ export function PublicationPaceChart({ history }) {
 
 // 3 — Report Quality Score Trend
 export function ReportQualityChart({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Report Quality AI Score Trend" subtitle="Non-zero weekly scores · green band = ≥85 target · avg rolling line" color={COLOR}><EmptyChartState /></ChartCard>;
+
   const scoreData = data.filter(d => d.aiScore > 0).map(d => ({ week: d.week, score: d.aiScore }));
   const avgScore = scoreData.length > 0
     ? parseFloat((scoreData.reduce((s, d) => s + d.score, 0) / scoreData.length).toFixed(1))
     : 0;
 
   return (
-    <ChartCard title="Report Quality AI Score Trend" subtitle="Non-zero weekly scores · green band = ≥85 target · avg rolling line" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Report Quality AI Score Trend" subtitle="Non-zero weekly scores · green band = ≥85 target · avg rolling line" color={COLOR}
       insight={scoreData.length > 0
         ? `${scoreData.length} reports reviewed. Average quality score: ${avgScore}/100. ${avgScore >= 85 ? '✓ Above 85% threshold.' : `⚠ ${(85 - avgScore).toFixed(1)} points below target.`} ${scoreData.filter(d => d.score >= 85).length}/${scoreData.length} reports met threshold.`
         : 'No reports reviewed yet. Submit AI quality scores in weekly input form.'}>
       {scoreData.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#475569', fontSize: '13px' }}>
-          No quality scores submitted yet. Enter scores when reviewing reports.
-        </div>
+        <EmptyChartState message="Enter quality scores when reviewing reports" />
       ) : (
         <>
           <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
@@ -135,12 +139,6 @@ export function ReportQualityChart({ history }) {
           </div>
           <ResponsiveContainer width="100%" height={170}>
             <ComposedChart data={scoreData} margin={CHART_DEFAULTS.margin}>
-              <defs>
-                <linearGradient id="qualGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10B981" stopOpacity={0.15} />
-                  <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => `Wk ${v}`} />
               <YAxis tick={{ fill: '#475569', fontSize: 10 }} domain={[60, 100]} />
@@ -158,7 +156,9 @@ export function ReportQualityChart({ history }) {
 
 // 4 — Annual Report Progress
 export function AnnualReportProgress({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Annual Impact Report Progress" subtitle="Monthly update · milestones tracked · AI pace estimate" color={COLOR}><EmptyChartState /></ChartCard>;
+
   const updates = data.filter(d => d.reportPct > 0);
   const latest = updates[updates.length - 1];
   const pct = latest?.reportPct || 0;
@@ -176,7 +176,7 @@ export function AnnualReportProgress({ history }) {
   ];
 
   return (
-    <ChartCard title="Annual Impact Report Progress" subtitle="Monthly update · milestones tracked · AI pace estimate" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Annual Impact Report Progress" subtitle="Monthly update · milestones tracked · AI pace estimate" color={COLOR}
       insight={`Report is ${pct}% complete. ${updateRate > 0 ? `At current pace (+${updateRate.toFixed(1)}%/week), estimated completion: Week ${estimatedWeek} of 52.` : 'Update the report % monthly to track pace.'}`}>
       <div style={{ marginBottom: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -194,7 +194,6 @@ export function AnnualReportProgress({ history }) {
               </div>
             )}
           </div>
-          {/* Milestone ticks */}
           {milestones.map(m => (
             <div key={m.pct} style={{
               position: 'absolute', top: 0, bottom: 0,
@@ -212,7 +211,6 @@ export function AnnualReportProgress({ history }) {
           ))}
         </div>
       </div>
-      {/* Progress history if available */}
       {updates.length > 1 && (
         <ResponsiveContainer width="100%" height={80}>
           <AreaChart data={updates} margin={{ top: 2, right: 5, left: -25, bottom: 0 }}>
@@ -234,7 +232,9 @@ export function AnnualReportProgress({ history }) {
 
 // 5 — External Reach Combo
 export function ExternalReachChart({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="External Reach — Citations & Submissions" subtitle="Bars = weekly activity · line = cumulative citations" color={COLOR}><EmptyChartState /></ChartCard>;
+
   let cumCitations = 0;
   const chartData = data.map(d => {
     cumCitations += d.citations;
@@ -245,7 +245,7 @@ export function ExternalReachChart({ history }) {
   const last6 = data.slice(-6).filter(d => d.submitted === 1).length;
 
   return (
-    <ChartCard title="External Reach — Citations & Submissions" subtitle="Bars = weekly activity · line = cumulative citations" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="External Reach — Citations & Submissions" subtitle="Bars = weekly activity · line = cumulative citations" color={COLOR}
       insight={`${totalCitations}/2 citations confirmed YTD. ${totalSubmissions} external submissions total. Last 6 weeks: ${last6} submission${last6 !== 1 ? 's' : ''} (higher activity increases citation probability).`}>
       <ResponsiveContainer width="100%" height={190}>
         <ComposedChart data={chartData} margin={CHART_DEFAULTS.margin}>

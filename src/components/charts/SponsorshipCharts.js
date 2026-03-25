@@ -4,13 +4,13 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, ReferenceLine, Area
 } from 'recharts';
-import { ChartCard, DarkTooltip, AIInsightBox, StatPill, CHART_DEFAULTS } from './ChartShared';
-import { PLACEHOLDER, pacePoint, hasEnoughData, extractTeamData } from '../../data/placeholderData';
+import { ChartCard, DarkTooltip, AIInsightBox, StatPill, CHART_DEFAULTS, EmptyChartState } from './ChartShared';
+import { pacePoint, hasEnoughData, extractTeamData } from '../../data/placeholderData';
 
 const COLOR = '#10B981';
 
 function buildData(history) {
-  if (!hasEnoughData(history, 'sponsorships')) return { data: PLACEHOLDER.sponsorships, isPlaceholder: true };
+  if (!hasEnoughData(history, 'sponsorships')) return { data: [], isEmpty: true };
   const raw = extractTeamData(history, 'sponsorships');
   const data = raw.map(e => ({
     week: e.weekNumber,
@@ -22,12 +22,14 @@ function buildData(history) {
     fundsWeek: e.inputs.fundsRaisedThisWeek || 0,
     fundsYTD: e.inputs.totalFundsRaisedYTD || 0,
   }));
-  return { data, isPlaceholder: false };
+  return { data, isEmpty: false };
 }
 
 // 1 — Fundraising Thermometer
 export function FundraisingThermometer({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Fundraising Thermometer" subtitle="YTD total vs. $10,000 annual target" color={COLOR}><EmptyChartState /></ChartCard>;
+
   const latest = data[data.length - 1];
   const ytd = latest?.fundsYTD || 0;
   const pct = Math.min((ytd / 10000) * 100, 100);
@@ -36,10 +38,9 @@ export function FundraisingThermometer({ history }) {
   const weeksToTarget = weeklyAvg > 0 ? Math.ceil((10000 - ytd) / weeklyAvg) : '—';
 
   return (
-    <ChartCard title="Fundraising Thermometer" subtitle="YTD total vs. $10,000 annual target" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Fundraising Thermometer" subtitle="YTD total vs. $10,000 annual target" color={COLOR}
       insight={`$${ytd.toLocaleString()} raised (${pct.toFixed(1)}% of target). Avg $${weeklyAvg.toLocaleString()}/week. At this pace, target reached in ~${weeksToTarget} weeks.`}>
       <div style={{ display: 'flex', gap: '24px', alignItems: 'center', justifyContent: 'center' }}>
-        {/* Thermometer SVG */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
           <div style={{ fontSize: '11px', color: '#475569' }}>$10,000</div>
           <div style={{ position: 'relative', width: '36px', height: '160px', background: '#0f172a', borderRadius: '18px 18px 0 0', border: '2px solid #334155', overflow: 'hidden' }}>
@@ -48,7 +49,6 @@ export function FundraisingThermometer({ history }) {
               height: `${pct}%`,
               background: `linear-gradient(to top, ${fillColor}, ${fillColor}99)`,
               transition: 'height 0.8s ease',
-              borderRadius: '0 0 0 0'
             }} />
             {[75, 50, 25].map(tick => (
               <div key={tick} style={{ position: 'absolute', bottom: `${tick}%`, left: 0, right: 0, borderTop: '1px dashed #1e293b' }} />
@@ -63,7 +63,6 @@ export function FundraisingThermometer({ history }) {
           </div>
           <div style={{ fontSize: '11px', color: '#475569' }}>$0</div>
         </div>
-        {/* Stats */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={{ background: fillColor + '15', border: `1px solid ${fillColor}30`, borderRadius: '8px', padding: '12px 16px' }}>
             <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>Raised YTD</div>
@@ -86,7 +85,9 @@ export function FundraisingThermometer({ history }) {
 
 // 2 — Partner Pipeline Kanban
 export function PartnerPipelineKanban({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Partner Pipeline Kanban" subtitle="Live stage snapshot · outreach → meeting → formalised" color={COLOR}><EmptyChartState /></ChartCard>;
+
   const latest = data[data.length - 1];
   const cols = [
     { label: 'Outreach', value: latest?.prospectsOutreach || 0, color: '#3B82F6', icon: '📤' },
@@ -98,7 +99,7 @@ export function PartnerPipelineKanban({ history }) {
   const convRate = totalMeetings > 0 ? ((totalPartnerships / totalMeetings) * 100).toFixed(1) : 0;
 
   return (
-    <ChartCard title="Partner Pipeline Kanban" subtitle="Live stage snapshot · outreach → meeting → formalised" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Partner Pipeline Kanban" subtitle="Live stage snapshot · outreach → meeting → formalised" color={COLOR}
       insight={`${totalMeetings} total meetings held. Conversion rate to partnership: ${convRate}% (target: 20%). ${totalPartnerships >= 1 ? '✓ Year 1 partner target met.' : '0 active partners — pipeline needs to close.'}`}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginTop: '4px' }}>
         {cols.map((col, i) => (
@@ -110,7 +111,6 @@ export function PartnerPipelineKanban({ history }) {
             <div style={{ fontSize: '24px', marginBottom: '6px' }}>{col.icon}</div>
             <div style={{ fontSize: '28px', fontWeight: '800', color: col.color }}>{col.value}</div>
             <div style={{ fontSize: '11px', color: '#475569', marginTop: '3px' }}>{col.label}</div>
-            {/* Dots representing prospects */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', justifyContent: 'center', marginTop: '10px' }}>
               {Array.from({ length: Math.min(col.value, 8) }).map((_, j) => (
                 <div key={j} style={{ width: '8px', height: '8px', borderRadius: '50%', background: col.color + '70' }} />
@@ -126,11 +126,13 @@ export function PartnerPipelineKanban({ history }) {
 
 // 3 — Weekly Funds Bar + Cumulative Line
 export function WeeklyFundsChart({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Weekly Funds Raised + Cumulative YTD" subtitle="Bars = weekly · line = cumulative · dashed = required pace" color={COLOR}><EmptyChartState /></ChartCard>;
+
   const chartData = data.map(d => ({ ...d, pace: pacePoint(d.week, 10000) }));
 
   return (
-    <ChartCard title="Weekly Funds Raised + Cumulative YTD" subtitle="Bars = weekly · line = cumulative · dashed = required pace" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Weekly Funds Raised + Cumulative YTD" subtitle="Bars = weekly · line = cumulative · dashed = required pace" color={COLOR}
       insight={`Latest YTD: $${(data[data.length - 1]?.fundsYTD || 0).toLocaleString()}. Required YTD pace at week ${data[data.length - 1]?.week || '—'}: $${Math.round(pacePoint(data[data.length - 1]?.week || 0, 10000)).toLocaleString()}.`}>
       <ResponsiveContainer width="100%" height={200}>
         <ComposedChart data={chartData} margin={CHART_DEFAULTS.margin}>
@@ -152,7 +154,9 @@ export function WeeklyFundsChart({ history }) {
 
 // 4 — Conversion Rate Trend
 export function ConversionRateChart({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Outreach → Partnership Conversion Rate" subtitle="Cumulative rolling rate vs. 20% target" color={COLOR}><EmptyChartState /></ChartCard>;
+
   let cumulativeMeetings = 0, cumulativePartnerships = 0;
   const chartData = data.map(d => {
     cumulativeMeetings += d.meetings;
@@ -163,7 +167,7 @@ export function ConversionRateChart({ history }) {
   const latest = chartData[chartData.length - 1];
 
   return (
-    <ChartCard title="Outreach → Partnership Conversion Rate" subtitle="Cumulative rolling rate vs. 20% target" color={COLOR} isPlaceholder={isPlaceholder}
+    <ChartCard title="Outreach → Partnership Conversion Rate" subtitle="Cumulative rolling rate vs. 20% target" color={COLOR}
       insight={`Current conversion rate: ${latest?.conversionRate || 0}% (target: 20%). ${(latest?.conversionRate || 0) >= 20 ? '✓ On target.' : `Need to convert ${Math.max(0, Math.ceil(cumulativeMeetings * 0.2 - cumulativePartnerships))} more meetings into partnerships.`}`}>
       <ResponsiveContainer width="100%" height={190}>
         <ComposedChart data={chartData} margin={CHART_DEFAULTS.margin}>
@@ -187,13 +191,14 @@ export function ConversionRateChart({ history }) {
 
 // 5 — AI Deal Health Assessment
 export function DealHealthCard({ history }) {
-  const { data, isPlaceholder } = buildData(history);
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="AI Deal Health Assessment" subtitle="Pipeline stage analysis + recommended action" color={COLOR} isAI><EmptyChartState /></ChartCard>;
+
   const latest = data[data.length - 1];
   const totalMeetings = data.reduce((s, d) => s + d.meetings, 0);
   const pipelineSize = (latest?.prospectsOutreach || 0) + (latest?.prospectsMeeting || 0);
   const health = pipelineSize >= 8 ? 'Strong' : pipelineSize >= 4 ? 'Active' : 'Thin';
   const healthColor = health === 'Strong' ? '#34d399' : health === 'Active' ? '#fbbf24' : '#f87171';
-
   const stages = [
     { label: 'Outreach quality', score: Math.min(totalMeetings * 8, 100), color: '#3B82F6' },
     { label: 'Pipeline depth', score: Math.min(pipelineSize * 10, 100), color: '#F59E0B' },
@@ -201,7 +206,7 @@ export function DealHealthCard({ history }) {
   ];
 
   return (
-    <ChartCard title="AI Deal Health Assessment" subtitle="Pipeline stage analysis + recommended action" color={COLOR} isPlaceholder={isPlaceholder} isAI>
+    <ChartCard title="AI Deal Health Assessment" subtitle="Pipeline stage analysis + recommended action" color={COLOR} isAI>
       <div style={{ background: healthColor + '15', border: `1px solid ${healthColor}40`, borderRadius: '10px', padding: '12px 16px', textAlign: 'center', marginBottom: '14px' }}>
         <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '3px' }}>Overall Pipeline Health</div>
         <div style={{ fontSize: '22px', fontWeight: '800', color: healthColor }}>{health}</div>
@@ -222,10 +227,10 @@ export function DealHealthCard({ history }) {
         verdictColor={healthColor}
         text={
           health === 'Strong'
-            ? `Pipeline has ${pipelineSize} active prospects across stages. Focus on moving meeting-stage prospects to close — formal partnership announcement would unlock further outreach.`
+            ? `Pipeline has ${pipelineSize} active prospects across stages. Focus on moving meeting-stage prospects to close.`
             : health === 'Active'
-            ? `${pipelineSize} prospects in pipeline. Prioritise advancing meeting-stage conversations to partnership agreements before adding new outreach volume.`
-            : `Pipeline is critically thin with only ${pipelineSize} prospects. Immediately increase outreach — target 3 new prospect calls per week for the next month.`
+            ? `${pipelineSize} prospects in pipeline. Prioritise advancing meeting-stage conversations to formal agreements.`
+            : `Pipeline is thin with only ${pipelineSize} prospects. Increase outreach — target 3 new prospect calls per week.`
         }
       />
     </ChartCard>
