@@ -308,16 +308,15 @@ export const DEFAULT_WEEK_INPUTS = {
     annualReportPercentComplete: 0
   },
   events: {
-    hoursEventPlanning: 0,
-    eventLiveOrWithin2Weeks: 0,
-    eventsCompletedYTD: 0,
-    newRegistrationsConfirmed: 0,
-    totalConfirmedAttendeesYTD: 0,
-    sponsorConversationsHeld: 0,
-    eventsWithConfirmedSponsorYTD: 0,
-    postEventSatisfactionScore: 0,
-    repeatAttendeesClosedEvent: 0,
-    totalAttendeesClosedEvent: 0
+    eventsHeldThisWeek: 0,
+    totalEventsYTD: 0,
+    attendeesThisWeek: 0,
+    totalAttendeesYTD: 0,
+    attendeeSatisfactionScore: 0,
+    repeatAttendeePercentage: 0,
+    eventSponsorsSecured: 0,
+    volunteersEngaged: 0,
+    schoolsReachedYTD: 0
   }
 };
 
@@ -364,15 +363,14 @@ export const TEAM_INPUT_FIELDS = {
     { key: 'annualReportPercentComplete', label: 'Annual impact report % complete', type: 'integer', note: 'Enter 0 in non-update weeks; update monthly' }
   ],
   events: [
-    { key: 'hoursEventPlanning', label: 'Hours spent on event planning this week', type: 'decimal', note: 'e.g. 4.5' },
-    { key: 'eventLiveOrWithin2Weeks', label: 'Is an event live or within 2 weeks?', type: 'binary', note: '1 = yes, 0 = no' },
-    { key: 'eventsCompletedYTD', label: 'Events completed YTD', type: 'integer', note: 'Current absolute count' },
-    { key: 'newRegistrationsConfirmed', label: 'New registrations confirmed this week', type: 'integer', note: '' },
-    { key: 'totalConfirmedAttendeesYTD', label: 'Total confirmed attendees YTD', type: 'integer', note: 'Current absolute count' },
-    { key: 'sponsorConversationsHeld', label: 'Sponsor or partner conversations held this week', type: 'integer', note: '' },
-    { key: 'eventsWithConfirmedSponsorYTD', label: 'Events with a confirmed sponsor YTD', type: 'integer', note: 'Current absolute count' },
-    { key: 'postEventSatisfactionScore', label: 'Post-event satisfaction score (out of 5)', type: 'decimal', badge: 'EVENT-TRIGGERED', note: 'Enter 0 if no event closed' },
-    { key: 'repeatAttendeesClosedEvent', label: 'Repeat attendees at the closed event', type: 'integer', badge: 'EVENT-TRIGGERED', note: 'Enter 0 if no event closed' },
-    { key: 'totalAttendeesClosedEvent', label: 'Total attendees at the closed event', type: 'integer', badge: 'EVENT-TRIGGERED', note: 'Enter 0 if no event closed' }
+    { key: 'eventsHeldThisWeek', label: 'Events held this week', type: 'integer', note: '' },
+    { key: 'totalEventsYTD', label: 'Total events held YTD', type: 'integer', note: 'Current absolute count' },
+    { key: 'attendeesThisWeek', label: 'Attendees at events this week', type: 'integer', note: '' },
+    { key: 'totalAttendeesYTD', label: 'Total attendees YTD', type: 'integer', note: 'Current absolute count' },
+    { key: 'attendeeSatisfactionScore', label: 'Attendee satisfaction score (%)', type: 'decimal', badge: 'EVENT-TRIGGERED', note: 'Enter 0 in non-event weeks' },
+    { key: 'repeatAttendeePercentage', label: 'Repeat attendee percentage (%)', type: 'decimal', badge: 'EVENT-TRIGGERED', note: 'Enter 0 in non-event weeks' },
+    { key: 'eventSponsorsSecured', label: 'Event sponsors secured this week', type: 'integer', note: '' },
+    { key: 'volunteersEngaged', label: 'Volunteers engaged this week', type: 'integer', note: '' },
+    { key: 'schoolsReachedYTD', label: 'Schools reached YTD', type: 'integer', note: 'Current absolute count' }
   ]
 };

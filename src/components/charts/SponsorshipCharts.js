@@ -129,7 +129,7 @@ export function WeeklyFundsChart({ history }) {
   const { data, isEmpty } = buildData(history);
   if (isEmpty) return <ChartCard title="Weekly Funds Raised + Cumulative YTD" subtitle="Bars = weekly · line = cumulative · dashed = required pace" color={COLOR}><EmptyChartState /></ChartCard>;
 
-  const chartData = data.map(d => ({ ...d, pace: pacePoint(d.week, 10000) }));
+  const chartData = data.map(d => ({ ...d, pace: d.week >= 1 ? pacePoint(d.week, 10000) : null }));
 
   return (
     <ChartCard title="Weekly Funds Raised + Cumulative YTD" subtitle="Bars = weekly · line = cumulative · dashed = required pace" color={COLOR}
@@ -137,7 +137,7 @@ export function WeeklyFundsChart({ history }) {
       <ResponsiveContainer width="100%" height={200}>
         <ComposedChart data={chartData} margin={CHART_DEFAULTS.margin}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} />
+          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
           <YAxis yAxisId="left" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
           <YAxis yAxisId="right" orientation="right" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
           <Tooltip content={<DarkTooltip formatter={(v) => `$${v.toLocaleString()}`} />} />
@@ -172,7 +172,7 @@ export function ConversionRateChart({ history }) {
       <ResponsiveContainer width="100%" height={190}>
         <ComposedChart data={chartData} margin={CHART_DEFAULTS.margin}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} />
+          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
           <YAxis tick={{ fill: '#475569', fontSize: 10 }} domain={[0, 40]} tickFormatter={v => v + '%'} />
           <Tooltip content={<DarkTooltip formatter={(v) => v + '%'} />} />
           <defs>

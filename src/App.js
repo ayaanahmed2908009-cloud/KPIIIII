@@ -69,7 +69,9 @@ export default function App() {
       inputs
     };
     setHistory(prev => {
-      const next = [...prev, entry];
+      // Replace any existing entry for the same team + week (prevents duplicates)
+      const filtered = prev.filter(e => !(e.team === team && e.weekNumber === fyWeek));
+      const next = [...filtered, entry];
       saveHistory(next);
       return next;
     });
@@ -88,7 +90,8 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ weekNumber, history })
       });
-      const data = await response.json();
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+      const data = await response.json().catch(() => { throw new Error('Invalid response from server'); });
       if (!data.success) throw new Error(data.error || 'Analysis failed');
 
       const entry = {

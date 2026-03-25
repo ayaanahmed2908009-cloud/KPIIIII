@@ -62,7 +62,7 @@ export function EventCalendarHeatmap({ history }) {
       </div>
       <ResponsiveContainer width="100%" height={90}>
         <BarChart data={data} margin={{ top: 0, right: 5, left: -20, bottom: 0 }}>
-          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 9 }} />
+          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 9 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
           <YAxis tick={{ fill: '#475569', fontSize: 9 }} allowDecimals={false} />
           <Tooltip content={<DarkTooltip />} />
           <Bar dataKey="eventsHeld" name="Events held" radius={[3, 3, 0, 0]}>
@@ -84,7 +84,7 @@ export function AttendeeTrackerChart({ history }) {
   let cumAttendees = 0;
   const chartData = data.map(d => {
     cumAttendees += d.attendees;
-    return { ...d, cumAttendees, pace: pacePoint(d.week, 500) };
+    return { ...d, cumAttendees, pace: d.week >= 1 ? pacePoint(d.week, 500) : null };
   });
   const latest = chartData[chartData.length - 1];
   const weeklyAvg = data.length > 0 ? Math.round(data.reduce((s, d) => s + d.attendees, 0) / data.length) : 0;
@@ -100,7 +100,7 @@ export function AttendeeTrackerChart({ history }) {
       <ResponsiveContainer width="100%" height={180}>
         <ComposedChart data={chartData} margin={CHART_DEFAULTS.margin}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} />
+          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
           <YAxis yAxisId="left" tick={{ fill: '#475569', fontSize: 10 }} allowDecimals={false} />
           <YAxis yAxisId="right" orientation="right" tick={{ fill: '#475569', fontSize: 10 }} />
           <Tooltip content={<DarkTooltip />} />
@@ -146,7 +146,7 @@ export function SatisfactionDotPlot({ history }) {
           <ResponsiveContainer width="100%" height={180}>
             <ComposedChart data={satisfactionData} margin={CHART_DEFAULTS.margin}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => `Wk ${v}`} />
+              <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
               <YAxis tick={{ fill: '#475569', fontSize: 10 }} domain={[60, 100]} tickFormatter={v => v + '%'} />
               <Tooltip content={<DarkTooltip formatter={(v, n) => n === 'satisfaction' ? v + '%' : v} />} />
               <ReferenceLine y={85} stroke="#10B981" strokeDasharray="4 4" label={{ value: 'Target 85%', fill: '#10B981', fontSize: 10 }} />
@@ -203,7 +203,7 @@ export function RepeatAttendeeGauge({ history }) {
       {trendData.length > 1 && (
         <ResponsiveContainer width="100%" height={90}>
           <LineChart data={trendData} margin={{ top: 0, right: 5, left: -25, bottom: 0 }}>
-            <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 9 }} tickFormatter={v => `Wk${v}`} />
+            <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 9 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
             <YAxis tick={{ fill: '#475569', fontSize: 9 }} tickFormatter={v => v + '%'} />
             <Tooltip content={<DarkTooltip formatter={v => v + '%'} />} />
             <ReferenceLine y={30} stroke="#10B981" strokeDasharray="3 2" strokeWidth={1} />
@@ -247,7 +247,7 @@ export function SponsorVolunteerChart({ history }) {
       <ResponsiveContainer width="100%" height={170}>
         <ComposedChart data={chartData} margin={CHART_DEFAULTS.margin}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} />
+          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
           <YAxis yAxisId="left" tick={{ fill: '#475569', fontSize: 10 }} allowDecimals={false} />
           <YAxis yAxisId="right" orientation="right" tick={{ fill: '#475569', fontSize: 10 }} allowDecimals={false} />
           <Tooltip content={<DarkTooltip />} />

@@ -48,7 +48,7 @@ export function HeadcountChart({ history }) {
       <ResponsiveContainer width="100%" height={180}>
         <ComposedChart data={data} margin={CHART_DEFAULTS.margin}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} />
+          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
           <YAxis tick={{ fill: '#475569', fontSize: 10 }} domain={[0, 26]} />
           <Tooltip content={<DarkTooltip />} />
           <Legend iconSize={8} wrapperStyle={{ fontSize: 11, color: '#64748b' }} />
@@ -94,7 +94,7 @@ export function OKRHeatmapChart({ history }) {
       </div>
       <ResponsiveContainer width="100%" height={100}>
         <BarChart data={data.map(d => ({ week: d.week, rate: d.okrDue > 0 ? parseFloat((d.okrCompleted / d.okrDue * 100).toFixed(1)) : 0 }))} margin={{ top: 0, right: 5, left: -20, bottom: 0 }}>
-          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 9 }} />
+          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 9 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
           <YAxis tick={{ fill: '#475569', fontSize: 9 }} domain={[0, 100]} tickFormatter={v => v + '%'} />
           <Tooltip content={<DarkTooltip formatter={(v) => v + '%'} />} />
           <ReferenceLine y={70} stroke="#F59E0B" strokeDasharray="3 2" strokeWidth={1} />
@@ -168,7 +168,7 @@ export function SatisfactionChart({ history }) {
           <ResponsiveContainer width="100%" height={170}>
             <BarChart data={surveyData} margin={CHART_DEFAULTS.margin}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => `Wk ${v}`} />
+              <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
               <YAxis tick={{ fill: '#475569', fontSize: 10 }} domain={[70, 100]} tickFormatter={v => v + '%'} />
               <Tooltip content={<DarkTooltip formatter={(v, n) => n === 'satisfaction' ? v + '%' : v} />} />
               <ReferenceLine y={90} stroke="#10B981" strokeDasharray="4 4" label={{ value: 'Target 90%', fill: '#10B981', fontSize: 10 }} />
@@ -217,7 +217,7 @@ export function SelfVsAIChart({ history, analysisHistory }) {
       <ResponsiveContainer width="100%" height={190}>
         <LineChart data={chartData} margin={CHART_DEFAULTS.margin}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} />
+          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
           <YAxis tick={{ fill: '#475569', fontSize: 10 }} domain={[40, 100]} tickFormatter={v => v + '%'} />
           <Tooltip content={<DarkTooltip formatter={(v) => v ? v + '%' : '—'} />} />
           <Legend iconSize={8} wrapperStyle={{ fontSize: 11, color: '#64748b' }} />

@@ -90,7 +90,7 @@ export function PublicationPaceChart({ history }) {
   const { data, isEmpty } = buildData(history);
   if (isEmpty) return <ChartCard title="Publication Pace vs. Annual Target" subtitle="Cumulative articles published (step) · dashed = required pace to hit 8" color={COLOR}><EmptyChartState /></ChartCard>;
 
-  const chartData = data.map(d => ({ ...d, pace: pacePoint(d.week, 8) }));
+  const chartData = data.map(d => ({ ...d, pace: d.week >= 1 ? pacePoint(d.week, 8) : null }));
   const latest = data[data.length - 1];
   const weeklyRate = latest?.publishedYTD && data.length > 0 ? (latest.publishedYTD / data.length).toFixed(2) : 0;
   const projectedByWeek52 = parseFloat((weeklyRate * 52).toFixed(0));
@@ -101,7 +101,7 @@ export function PublicationPaceChart({ history }) {
       <ResponsiveContainer width="100%" height={190}>
         <ComposedChart data={chartData} margin={CHART_DEFAULTS.margin}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} />
+          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
           <YAxis tick={{ fill: '#475569', fontSize: 10 }} domain={[0, 9]} />
           <Tooltip content={<DarkTooltip />} />
           <Legend iconSize={8} wrapperStyle={{ fontSize: 11, color: '#64748b' }} />
@@ -140,7 +140,7 @@ export function ReportQualityChart({ history }) {
           <ResponsiveContainer width="100%" height={170}>
             <ComposedChart data={scoreData} margin={CHART_DEFAULTS.margin}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => `Wk ${v}`} />
+              <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
               <YAxis tick={{ fill: '#475569', fontSize: 10 }} domain={[60, 100]} />
               <Tooltip content={<DarkTooltip />} />
               <ReferenceLine y={85} stroke="#10B981" strokeDasharray="4 4" label={{ value: 'Target 85', fill: '#10B981', fontSize: 10 }} />
@@ -214,7 +214,7 @@ export function AnnualReportProgress({ history }) {
       {updates.length > 1 && (
         <ResponsiveContainer width="100%" height={80}>
           <AreaChart data={updates} margin={{ top: 2, right: 5, left: -25, bottom: 0 }}>
-            <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 9 }} tickFormatter={v => `Wk${v}`} />
+            <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 9 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
             <YAxis tick={{ fill: '#475569', fontSize: 9 }} domain={[0, 100]} />
             <Tooltip content={<DarkTooltip formatter={(v) => v + '%'} />} />
             <Area type="monotone" dataKey="reportPct" stroke={COLOR} fill={COLOR + '20'} strokeWidth={2} name="Report %" dot={false} />
@@ -250,7 +250,7 @@ export function ExternalReachChart({ history }) {
       <ResponsiveContainer width="100%" height={190}>
         <ComposedChart data={chartData} margin={CHART_DEFAULTS.margin}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} />
+          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
           <YAxis yAxisId="left" tick={{ fill: '#475569', fontSize: 10 }} allowDecimals={false} />
           <YAxis yAxisId="right" orientation="right" tick={{ fill: '#475569', fontSize: 10 }} allowDecimals={false} />
           <Tooltip content={<DarkTooltip />} />

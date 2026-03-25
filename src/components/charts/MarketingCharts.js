@@ -37,7 +37,7 @@ export function FollowerGrowthChart({ history }) {
   const latest = data[data.length - 1];
   const weeklyGain = data.length > 1 ? Math.round((latest.followers - data[0].followers) / (data.length - 1)) : 0;
   const weeksToTarget = weeklyGain > 0 ? Math.ceil((3000 - latest.followers) / weeklyGain) : '—';
-  const chartData = data.map(d => ({ ...d, pace: pacePoint(d.week, 3000) }));
+  const chartData = data.map(d => ({ ...d, pace: d.week >= 1 ? pacePoint(d.week, 3000) : null }));
   const insight = `Currently ${latest.followers.toLocaleString()} followers — ${(3000 - latest.followers).toLocaleString()} away from target. At +${weeklyGain}/week, target reached in ~${weeksToTarget} weeks.`;
 
   return (
@@ -50,7 +50,7 @@ export function FollowerGrowthChart({ history }) {
       <ResponsiveContainer width="100%" height={180}>
         <ComposedChart data={chartData} margin={CHART_DEFAULTS.margin}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} label={{ value: 'Week', position: 'insideBottomRight', fill: '#334155', fontSize: 10 }} />
+          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
           <YAxis tick={{ fill: '#475569', fontSize: 10 }} domain={[0, 3200]} />
           <Tooltip content={<DarkTooltip formatter={(v, n) => n === 'followers' ? v.toLocaleString() : v} />} />
           <Legend iconSize={8} wrapperStyle={{ fontSize: 11, color: '#64748b' }} />
@@ -100,7 +100,7 @@ export function EngagementGaugeChart({ history }) {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <YAxis domain={[0, 6]} tick={{ fill: '#475569', fontSize: 9 }} />
-              <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 9 }} />
+              <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 9 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `W${v}`} />
               <Tooltip content={<DarkTooltip formatter={(v) => v + '%'} />} />
               <ReferenceLine y={2} stroke="#EF4444" strokeDasharray="3 2" strokeWidth={1} />
               <ReferenceLine y={4} stroke="#EF4444" strokeDasharray="3 2" strokeWidth={1} />
@@ -130,7 +130,7 @@ export function ContentMixChart({ history }) {
       <ResponsiveContainer width="100%" height={190}>
         <BarChart data={data} margin={CHART_DEFAULTS.margin}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} />
+          <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
           <YAxis tick={{ fill: '#475569', fontSize: 10 }} />
           <Tooltip content={<DarkTooltip />} />
           <Legend iconSize={8} wrapperStyle={{ fontSize: 11, color: '#64748b' }} />
