@@ -222,11 +222,18 @@ app.post('/api/analyze', async (req, res) => {
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-// Always serve the React build (API routes above take priority)
-app.use(express.static(path.join(__dirname, 'build')));
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
+// Serve React build — API routes above take priority
+const buildPath = path.join(__dirname, 'build');
+if (fs.existsSync(buildPath)) {
+  app.use(express.static(buildPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(buildPath, 'index.html'));
+  });
+} else {
+  app.get('*', (req, res) => {
+    res.status(200).send('SolarPak API running. Build folder not found — run npm run build first.');
+  });
+}
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`SolarPak API server running on port ${PORT}`));
