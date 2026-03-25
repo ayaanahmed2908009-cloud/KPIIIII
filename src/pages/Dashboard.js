@@ -398,7 +398,7 @@ function OwnTeamSection({ teamKey, teamInputs, onInputChange, onSubmitTeam, late
 }
 
 // ─── Dashboard Page ────────────────────────────────────────────────────────────
-export default function Dashboard({ history, analysisHistory, onAddEntry, onRunAnalysis, onLoadTrialData, isAnalysing, currentUser }) {
+export default function Dashboard({ history, analysisHistory, onAddEntry, onRunAnalysis, isAnalysing, currentUser }) {
   const latestAnalysis = analysisHistory.length > 0 ? analysisHistory[analysisHistory.length - 1]?.analysis : null;
   const latestAnalysisEntry = analysisHistory.length > 0 ? analysisHistory[analysisHistory.length - 1] : null;
   const warnings = getLeadershipWarnings(analysisHistory);
@@ -461,12 +461,6 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
               fontSize: '13px', fontWeight: '700', cursor: isAnalysing || history.length === 0 ? 'not-allowed' : 'pointer', fontFamily: 'inherit'
             }}>{isAnalysing ? '⏳ Running...' : '🤖 Run AI Analysis'}</button>
           )}
-          {onLoadTrialData && (
-            <button onClick={onLoadTrialData} style={{
-              padding: '10px 16px', borderRadius: '8px', border: '1px solid #1d4ed8',
-              background: 'transparent', color: '#60a5fa', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit'
-            }}>🧪 Trial Data</button>
-          )}
           <button onClick={() => exportHistory(history, analysisHistory)} disabled={history.length === 0} style={{
             padding: '10px 16px', borderRadius: '8px', border: '1px solid #334155',
             background: 'transparent', color: '#94a3b8', fontSize: '13px',
@@ -501,12 +495,6 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
               color: isAnalysing || history.length === 0 ? '#64748b' : '#fff',
               fontSize: '13px', fontWeight: '700', cursor: isAnalysing || history.length === 0 ? 'not-allowed' : 'pointer', fontFamily: 'inherit'
             }}>{isAnalysing ? '⏳ Running...' : '🤖 Run AI Analysis'}</button>
-          )}
-          {onLoadTrialData && (
-            <button onClick={onLoadTrialData} style={{
-              padding: '10px 16px', borderRadius: '8px', border: '1px solid #1d4ed8',
-              background: 'transparent', color: '#60a5fa', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit'
-            }}>🧪 Trial Data</button>
           )}
           <button onClick={() => exportHistory(history, analysisHistory)} disabled={history.length === 0} style={{
             padding: '10px 16px', borderRadius: '8px', border: '1px solid #334155',

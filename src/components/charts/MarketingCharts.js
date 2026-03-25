@@ -9,6 +9,9 @@ import { pacePoint, hasEnoughData, extractTeamData } from '../../data/placeholde
 
 const COLOR = '#3B82F6';
 
+// Follower count as of 25 Mar 2026 (end of trial period) — used as display baseline
+const FOLLOWER_BASELINE = 1847;
+
 function buildMarketingData(history) {
   if (!hasEnoughData(history, 'marketing')) return { data: [], isEmpty: true };
   const raw = extractTeamData(history, 'marketing');
@@ -32,7 +35,7 @@ function buildMarketingData(history) {
 // 1 — Follower Growth Trajectory
 export function FollowerGrowthChart({ history }) {
   const { data, isEmpty } = buildMarketingData(history);
-  if (isEmpty) return <ChartCard title="Follower Growth Trajectory" subtitle="Weekly cumulative vs. pace-to-3,000 line" color={COLOR}><EmptyChartState /></ChartCard>;
+  if (isEmpty) return <ChartCard title="Follower Growth Trajectory" subtitle="Weekly cumulative vs. pace-to-3,000 line" color={COLOR}><EmptyChartState message={`Starting from ${FOLLOWER_BASELINE.toLocaleString()} followers · submit weekly inputs to track growth`} /></ChartCard>;
 
   const latest = data[data.length - 1];
   const weeklyGain = data.length > 1 ? Math.round((latest.followers - data[0].followers) / (data.length - 1)) : 0;

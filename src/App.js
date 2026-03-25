@@ -7,7 +7,6 @@ import Analytics from './pages/Analytics';
 import Login from './pages/Login';
 import AnalysisReport from './pages/AnalysisReport';
 import { loadHistory, saveHistory, loadAnalysisHistory, saveAnalysisHistory } from './utils/storage';
-import { SEED_ENTRIES, isSeedLoaded, markSeedLoaded, clearSeedFlag } from './data/seedData';
 import { getCurrentWeekNumber, getCurrentFYWeek, dateToFYWeek } from './utils/analysisHelpers';
 import { loadSession, clearSession, canRunAnalysis, canSeeAll } from './auth/users';
 
@@ -19,13 +18,12 @@ function getDefaultPage(user) {
 
 function initHistory() {
   const saved = loadHistory();
-  // Auto-inject trial data on very first load if localStorage is empty
-  if (saved.length === 0 && !isSeedLoaded()) {
-    saveHistory(SEED_ENTRIES);
-    markSeedLoaded();
-    return SEED_ENTRIES;
+  // Strip any leftover trial/seed entries (isTrial flag) — trial period is over
+  const real = saved.filter(e => !e.isTrial);
+  if (real.length !== saved.length) {
+    saveHistory(real);
   }
-  return saved;
+  return real;
 }
 
 export default function App() {
@@ -47,17 +45,6 @@ export default function App() {
     setCurrentUser(null);
     setCurrentPage('dashboard');
   };
-
-  // Reload / restore trial seed data (CEO/GM only)
-  const handleLoadTrialData = useCallback(() => {
-    if (!window.confirm('This will add the 2 pre-FY trial weeks (Mar 11–25) back into your data history. Any existing trial entries will be replaced. Continue?')) return;
-    // Strip existing trial entries then re-add
-    const nonTrial = history.filter(e => !e.isTrial);
-    const merged = [...SEED_ENTRIES, ...nonTrial];
-    saveHistory(merged);
-    markSeedLoaded();
-    setHistory(merged);
-  }, [history]);
 
   const handleAddEntry = useCallback((weekNumber, team, inputs) => {
     // Always tag the entry with the real FY week number derived from today's date
@@ -161,7 +148,6 @@ export default function App() {
           analysisHistory={analysisHistory}
           onAddEntry={handleAddEntry}
           onRunAnalysis={canRunAnalysis(currentUser.role) ? handleRunAnalysis : null}
-          onLoadTrialData={canSeeAll(currentUser.role) ? handleLoadTrialData : null}
           isAnalysing={isAnalysing}
           currentUser={currentUser}
         />
