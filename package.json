@@ -20,6 +20,9 @@
     "server": "node server.js",
     "build": "react-scripts build"
   },
+  "engines": {
+    "node": ">=18.0.0 <22.0.0"
+  },
   "proxy": "http://localhost:3001",
   "browserslist": {
     "production": [
