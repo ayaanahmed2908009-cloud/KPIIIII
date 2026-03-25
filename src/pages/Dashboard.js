@@ -288,9 +288,23 @@ function TeamOverview({ history, teamsToShow }) {
 }
 
 // ─── Weekly Input Form ─────────────────────────────────────────────────────────
-function WeeklyInputForm({ teamKey, values, onChange }) {
+function WeeklyInputForm({ teamKey, onChange }) {
   const fields = TEAM_INPUT_FIELDS[teamKey];
   const color = TEAM_COLORS[teamKey];
+  const defaults = DEFAULT_WEEK_INPUTS[teamKey];
+  // Local string state so users can type freely without being snapped back to 0
+  const [local, setLocal] = useState(() => {
+    const init = {};
+    fields.forEach(f => { init[f.key] = String(defaults[f.key] ?? 0); });
+    return init;
+  });
+
+  const handleChange = (field, rawVal) => {
+    setLocal(prev => ({ ...prev, [field.key]: rawVal }));
+    const num = field.type === 'decimal' ? parseFloat(rawVal) : parseInt(rawVal);
+    onChange(field.key, isNaN(num) ? 0 : num);
+  };
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '12px' }}>
       {fields.map(field => (
@@ -307,19 +321,19 @@ function WeeklyInputForm({ teamKey, values, onChange }) {
           </label>
           {field.type === 'binary' ? (
             <select
-              value={values[field.key] ?? 0}
-              onChange={e => onChange(field.key, Number(e.target.value))}
+              value={local[field.key] ?? '0'}
+              onChange={e => handleChange(field, e.target.value)}
               style={{ width: '100%', background: '#0f172a', border: '1px solid #1e293b', borderRadius: '6px', padding: '8px 10px', color: '#e2e8f0', fontSize: '13px', fontFamily: 'inherit', cursor: 'pointer' }}
             >
-              <option value={0}>0 — No</option>
-              <option value={1}>1 — Yes</option>
+              <option value="0">0 — No</option>
+              <option value="1">1 — Yes</option>
             </select>
           ) : (
             <input
               type="number"
               step={field.type === 'decimal' ? '0.1' : '1'}
-              value={values[field.key] ?? 0}
-              onChange={e => onChange(field.key, field.type === 'integer' ? parseInt(e.target.value) || 0 : parseFloat(e.target.value) || 0)}
+              value={local[field.key] ?? ''}
+              onChange={e => handleChange(field, e.target.value)}
               style={{ width: '100%', background: '#0f172a', border: '1px solid #1e293b', borderRadius: '6px', padding: '8px 10px', color: '#e2e8f0', fontSize: '13px', fontFamily: 'inherit', boxSizing: 'border-box', outline: 'none' }}
               onFocus={e => e.target.style.borderColor = color}
               onBlur={e => e.target.style.borderColor = '#1e293b'}
@@ -336,6 +350,7 @@ function WeeklyInputForm({ teamKey, values, onChange }) {
 function OwnTeamSection({ teamKey, teamInputs, onInputChange, onSubmitTeam, latestAnalysis, analysisHistory, lastSubmission }) {
   const [collapsed, setCollapsed] = useState(false);
   const [formTab, setFormTab] = useState('form');
+  const [submitKey, setSubmitKey] = useState(0);
   const color = TEAM_COLORS[teamKey];
   const label = TEAM_LABELS[teamKey];
   const teamAnalysis = latestAnalysis?.[teamKey];
@@ -377,9 +392,9 @@ function OwnTeamSection({ teamKey, teamInputs, onInputChange, onSubmitTeam, late
           </div>
           {formTab === 'form' && (
             <>
-              <WeeklyInputForm teamKey={teamKey} values={teamInputs} onChange={(key, val) => onInputChange(teamKey, key, val)} />
+              <WeeklyInputForm key={submitKey} teamKey={teamKey} onChange={(key, val) => onInputChange(teamKey, key, val)} />
               <button
-                onClick={() => onSubmitTeam(teamKey)}
+                onClick={() => { onSubmitTeam(teamKey); setSubmitKey(k => k + 1); }}
                 style={{ marginTop: '16px', padding: '10px 24px', borderRadius: '8px', border: 'none', background: color, color: '#fff', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
                 onMouseEnter={e => e.target.style.opacity = '0.85'}
                 onMouseLeave={e => e.target.style.opacity = '1'}
