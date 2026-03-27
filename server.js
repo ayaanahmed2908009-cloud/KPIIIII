@@ -101,23 +101,38 @@ FISCAL YEAR: ${fyLabel}
 CURRENT WEEK: ${weekNumber} of ${TOTAL_WEEKS}  (${weekDateRange})
 WEEKS ELAPSED: ${weekNumber}  |  WEEKS REMAINING: ${weeksRemaining}  |  YEAR PROGRESS: ${pctElapsed}% elapsed, ${pctRemaining}% remaining
 
-PROBABILITY CALIBRATION RULES (apply to every KPI):
-1. Time-sensitivity: If a team is behind pace but has ${weeksRemaining} weeks left, the probability should reflect the realistic chance of recovery — not just current pace extrapolation. A team 20% behind in week 4 with 48 weeks remaining has a much higher recovery probability than one 20% behind in week 48 with 4 weeks left.
-2. Early year (weeks 1–12): Widen confidence intervals. Low data = genuine uncertainty in both directions. Avoid extreme probabilities unless trajectory is clearly catastrophic or clearly ahead.
-3. Mid year (weeks 13–36): Trend lines are becoming reliable. Weight recent acceleration/deceleration heavily.
-4. Late year (weeks 37–52): Extrapolate from actual cumulative numbers. Very little variance possible. Probabilities should tighten toward 0 or 100 unless targets are borderline.
-5. Missing team data: If no inputs were submitted for a team this week, use the most recent available inputs to assess trajectory. Flag low_confidence = true.
-6. Pace formula: For cumulative targets, probability = f(current_pace × weeks_remaining vs. gap_to_target). For rate-based targets (e.g. engagement rate, retention), probability = f(average over available weeks vs. target band).
+YOUR PRIMARY TASK — TREND-BASED CONTINUOUS ASSESSMENT:
+You must NOT assess only the latest week in isolation. You must:
+1. Read ALL weeks of history for each team (including trial weeks with negative week numbers).
+2. Calculate the week-over-week DELTA for every key metric (e.g. follower growth, funds raised, articles published).
+3. Determine the TREND DIRECTION: accelerating, decelerating, flat, or volatile.
+4. Project that trend forward over ${weeksRemaining} remaining weeks to estimate end-of-year outcome.
+5. Compare the projected outcome to the annual target to derive the probability.
+
+TREND ANALYSIS RULES:
+- A single week of data → low_confidence = true, probability should be 40–65 (genuine uncertainty).
+- 2–3 weeks: look for direction. If consistently improving → probability leans higher. Flat or declining → lean lower. Still set low_confidence = true.
+- 4+ weeks: trends are meaningful. Weight the most recent 3 weeks 2× vs earlier weeks (recency bias).
+- If the latest week is significantly better than the prior average → reward with a probability bump. If worse → penalise.
+- For cumulative metrics (YTD totals, funds raised): compute average weekly increment across all weeks, project remaining weeks, compare to gap vs target.
+- For rate metrics (engagement %, retention %, satisfaction score): compute rolling average across all available weeks. Compare to target band.
+- Never give 0% or 100% unless the target is mathematically impossible/guaranteed.
+
+PROBABILITY CALIBRATION BY YEAR STAGE:
+- Early year (weeks 1–12): Intervals are wide. Avoid extremes. ${weeksRemaining} weeks remaining means plenty of recovery time.
+- Mid year (weeks 13–36): Trend reliability is high. Weight momentum heavily.
+- Late year (weeks 37–52): Extrapolate from cumulative actuals. Probabilities tighten sharply.
+- Missing team data this week: use last known inputs, flag low_confidence = true.
 
 YEAR 1 ANNUAL KPI TARGETS:
 ${targetsStr}
 
-COMPLETE WEEKLY INPUT HISTORY — ${history.length} entries, most recent last:
+COMPLETE WEEKLY INPUT HISTORY — ${history.length} entries, chronological (oldest first, most recent last):
 ${historyStr}
 
-For each KPI across all five teams, calculate the probability (0–100%) that the team will hit that KPI's annual target by the end of the year, based on current pace and trajectory.
+For each KPI across all five teams, calculate the probability (0–100%) that the team will hit that KPI's annual target by end of year. Base this on the FULL TREND across all weeks — not just the latest entry.
 
-If fewer than 4 weeks of data exist, set low_confidence to true and caveat estimates.
+If fewer than 4 weeks of real FY data exist (week number ≥ 1), set low_confidence to true.
 
 Return ONLY this JSON structure, no preamble, no markdown fences:
 
@@ -186,19 +201,23 @@ Return ONLY this JSON structure, no preamble, no markdown fences:
 
 app.post('/api/analyze', async (req, res) => {
   try {
-    console.log('[analyze] KEY present:', !!process.env.ANTHROPIC_API_KEY, '| KEY prefix:', (process.env.ANTHROPIC_API_KEY || '').slice(0, 16));
-    const client = getAnthropic();
-    if (!client) {
+    // Accept API key from request body (sent by client from localStorage) or fall back to env var
+    const { weekNumber, history, apiKey: bodyKey } = req.body;
+    const resolvedKey = bodyKey || process.env.ANTHROPIC_API_KEY;
+    console.log('[analyze] KEY source:', bodyKey ? 'request body' : 'env var', '| KEY present:', !!resolvedKey);
+
+    if (!resolvedKey) {
       return res.status(500).json({ success: false, error: 'ANTHROPIC_API_KEY not configured.' });
     }
 
-    const { weekNumber, history } = req.body;
+    // Build a fresh client with the resolved key
+    const client = new Anthropic({ apiKey: resolvedKey });
     console.log('[analyze] weekNumber:', weekNumber, '| history entries:', history?.length);
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 4096,
-      system: 'You are a KPI performance analyst. Return only valid JSON with no preamble, no markdown fences, and no extra text. Be concise — keep each rationale under 20 words and each diagnosis under 40 words.',
+      max_tokens: 6000,
+      system: 'You are a KPI performance analyst. Return only valid JSON with no preamble, no markdown fences, and no extra text. Analyse ALL weeks of history to identify trends before calculating probabilities. Keep each rationale under 25 words and each diagnosis under 50 words.',
       messages: [{ role: 'user', content: buildPrompt(weekNumber, history) }]
     });
 

@@ -34,6 +34,9 @@ export default function App() {
   const [isAnalysing, setIsAnalysing] = useState(false);
   const [analysisError, setAnalysisError] = useState(null);
   const [reportEntry, setReportEntry] = useState(null); // triggers briefing overlay
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('solarpak_api_key') || '');
+  const [showKeyInput, setShowKeyInput] = useState(false);
+  const [keyDraft, setKeyDraft] = useState('');
 
   const handleLogin = (user) => {
     setCurrentUser(user);
@@ -72,10 +75,11 @@ export default function App() {
     try {
       // Always use the real FY week so Claude knows exactly where we are in the year
       const weekNumber = getCurrentFYWeek();
+      const storedKey = localStorage.getItem('solarpak_api_key') || '';
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ weekNumber, history })
+        body: JSON.stringify({ weekNumber, history, apiKey: storedKey })
       });
       const data = await response.json().catch(() => { throw new Error(`Server error: ${response.status}`); });
       if (!response.ok) throw new Error(data.error || `Server error: ${response.status}`);
@@ -121,17 +125,57 @@ export default function App() {
       {analysisError && (
         <div style={{
           background: '#7f1d1d', border: '1px solid #ef4444',
-          padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '12px'
+          padding: '12px 24px',
         }}>
-          <span style={{ fontSize: '16px' }}>⚠️</span>
-          <span style={{ color: '#fecaca', fontSize: '13px' }}>
-            <strong>Analysis error: </strong>{analysisError}
-            {analysisError.includes('ANTHROPIC_API_KEY') && ' — add your key to the .env file and restart the server.'}
-          </span>
-          <button
-            onClick={() => setAnalysisError(null)}
-            style={{ marginLeft: 'auto', background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '18px' }}
-          >×</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '16px' }}>⚠️</span>
+            <span style={{ color: '#fecaca', fontSize: '13px', flex: 1 }}>
+              <strong>Analysis error: </strong>{analysisError}
+              {analysisError.includes('ANTHROPIC_API_KEY') && ' — enter your Anthropic API key below to fix this.'}
+            </span>
+            {analysisError.includes('ANTHROPIC_API_KEY') && (
+              <button
+                onClick={() => { setShowKeyInput(s => !s); setKeyDraft(apiKey); }}
+                style={{ background: '#991b1b', border: '1px solid #ef4444', borderRadius: '6px', color: '#fecaca', fontSize: '12px', padding: '4px 12px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+              >🔑 Set API Key</button>
+            )}
+            <button
+              onClick={() => { setAnalysisError(null); setShowKeyInput(false); }}
+              style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: '18px' }}
+            >×</button>
+          </div>
+          {showKeyInput && analysisError.includes('ANTHROPIC_API_KEY') && (
+            <div style={{ display: 'flex', gap: '8px', marginTop: '10px', alignItems: 'center' }}>
+              <input
+                type="password"
+                placeholder="sk-ant-api03-..."
+                value={keyDraft}
+                onChange={e => setKeyDraft(e.target.value)}
+                style={{
+                  flex: 1, padding: '8px 12px', borderRadius: '6px',
+                  background: '#0f172a', border: '1px solid #ef4444',
+                  color: '#f1f5f9', fontSize: '13px', fontFamily: 'monospace',
+                  outline: 'none',
+                }}
+              />
+              <button
+                onClick={() => {
+                  const trimmed = keyDraft.trim();
+                  if (!trimmed) return;
+                  localStorage.setItem('solarpak_api_key', trimmed);
+                  setApiKey(trimmed);
+                  setShowKeyInput(false);
+                  setAnalysisError(null);
+                  handleRunAnalysis();
+                }}
+                style={{
+                  padding: '8px 18px', borderRadius: '6px', border: 'none',
+                  background: '#ef4444', color: '#fff', fontSize: '13px',
+                  fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >Save & Retry</button>
+            </div>
+          )}
         </div>
       )}
 
