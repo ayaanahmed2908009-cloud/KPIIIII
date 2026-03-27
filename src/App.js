@@ -77,8 +77,8 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ weekNumber, history })
       });
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
-      const data = await response.json().catch(() => { throw new Error('Invalid response from server'); });
+      const data = await response.json().catch(() => { throw new Error(`Server error: ${response.status}`); });
+      if (!response.ok) throw new Error(data.error || `Server error: ${response.status}`);
       if (!data.success) throw new Error(data.error || 'Analysis failed');
 
       const entry = {
