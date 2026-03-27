@@ -10,7 +10,8 @@ if (fs.existsSync(envPath)) {
     if (idx === -1) return;
     const key = trimmed.slice(0, idx).trim();
     const value = trimmed.slice(idx + 1).trim();
-    process.env[key] = value;
+    // Only set if not already provided by the environment (Railway vars take priority)
+    if (!process.env[key]) process.env[key] = value;
   });
 }
 const express = require('express');
@@ -185,12 +186,14 @@ Return ONLY this JSON structure, no preamble, no markdown fences:
 
 app.post('/api/analyze', async (req, res) => {
   try {
+    console.log('[analyze] KEY present:', !!process.env.ANTHROPIC_API_KEY, '| KEY prefix:', (process.env.ANTHROPIC_API_KEY || '').slice(0, 16));
     const client = getAnthropic();
     if (!client) {
       return res.status(500).json({ success: false, error: 'ANTHROPIC_API_KEY not configured.' });
     }
 
     const { weekNumber, history } = req.body;
+    console.log('[analyze] weekNumber:', weekNumber, '| history entries:', history?.length);
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
