@@ -239,4 +239,7 @@ if (fs.existsSync(buildPath)) {
 }
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`SolarPak API server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`SolarPak API server running on port ${PORT}`);
+  console.log(`[startup] ANTHROPIC_API_KEY: ${process.env.ANTHROPIC_API_KEY ? 'SET ✓ (prefix: ' + process.env.ANTHROPIC_API_KEY.slice(0, 16) + ')' : 'MISSING ✗'}`);
+});
