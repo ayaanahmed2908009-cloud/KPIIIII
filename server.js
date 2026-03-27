@@ -110,19 +110,23 @@ You must NOT assess only the latest week in isolation. You must:
 5. Compare the projected outcome to the annual target to derive the probability.
 
 TREND ANALYSIS RULES:
-- A single week of data → low_confidence = true, probability should be 40–65 (genuine uncertainty).
-- 2–3 weeks: look for direction. If consistently improving → probability leans higher. Flat or declining → lean lower. Still set low_confidence = true.
+- A single week of data → low_confidence = true, probability should be 55–70 (assume early optimism, plenty of time to improve).
+- 2–3 weeks: look for direction. Improving → 60–75. Flat → 55–65. Declining → 45–60. Still set low_confidence = true.
 - 4+ weeks: trends are meaningful. Weight the most recent 3 weeks 2× vs earlier weeks (recency bias).
-- If the latest week is significantly better than the prior average → reward with a probability bump. If worse → penalise.
+- If the latest week is significantly better than the prior average → reward with a probability bump of 5–10 points.
+- If worse → penalise by no more than 5–8 points (teams recover; one bad week is not a death sentence).
 - For cumulative metrics (YTD totals, funds raised): compute average weekly increment across all weeks, project remaining weeks, compare to gap vs target.
 - For rate metrics (engagement %, retention %, satisfaction score): compute rolling average across all available weeks. Compare to target band.
-- Never give 0% or 100% unless the target is mathematically impossible/guaranteed.
+- Never give below 25% unless a target is mathematically impossible given weeks remaining.
+- Never give above 95% unless the target is already met or mathematically guaranteed.
 
-PROBABILITY CALIBRATION BY YEAR STAGE:
-- Early year (weeks 1–12): Intervals are wide. Avoid extremes. ${weeksRemaining} weeks remaining means plenty of recovery time.
-- Mid year (weeks 13–36): Trend reliability is high. Weight momentum heavily.
-- Late year (weeks 37–52): Extrapolate from cumulative actuals. Probabilities tighten sharply.
-- Missing team data this week: use last known inputs, flag low_confidence = true.
+PROBABILITY CALIBRATION BY YEAR STAGE — BE GENEROUS, ESPECIALLY EARLY:
+- Pre-FY / trial weeks (week ≤ 0): These are warm-up weeks. Treat any activity as a positive signal. Base probability 60–75.
+- Early year (weeks 1–12): ${weeksRemaining} weeks of recovery time remain. Default to optimistic range 55–80 unless trend is clearly catastrophic. A team behind by 20% in week 4 still has a 70%+ chance of recovery.
+- Mid year (weeks 13–36): Trend lines are becoming reliable. Weight momentum heavily but maintain a floor of 35%.
+- Late year (weeks 37–52): Extrapolate from cumulative actuals. Probabilities tighten. Floor is 15%.
+- Missing team data this week: use last known inputs, do not penalise, flag low_confidence = true.
+- IMPORTANT: SolarPak is a new nonprofit. Be encouraging but honest. Err on the side of achievable rather than harsh.
 
 YEAR 1 ANNUAL KPI TARGETS:
 ${targetsStr}
