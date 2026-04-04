@@ -20,7 +20,6 @@ function buildData(history) {
     attendeesYTD: e.inputs.totalAttendeesYTD || 0,
     satisfaction: e.inputs.attendeeSatisfactionScore || 0,
     repeatPct: e.inputs.repeatAttendeePercentage || 0,
-    sponsors: e.inputs.eventSponsorsSecured || 0,
     volunteers: e.inputs.volunteersEngaged || 0,
     schoolsReached: e.inputs.schoolsReachedYTD || 0,
   }));
@@ -215,33 +214,32 @@ export function RepeatAttendeeGauge({ history }) {
   );
 }
 
-// 5 — Event Sponsor & Volunteer Pipeline
+// 5 — Volunteer Engagement
 export function SponsorVolunteerChart({ history }) {
   const { data, isEmpty } = buildData(history);
-  if (isEmpty) return <ChartCard title="Event Sponsors & Volunteers" subtitle="Weekly volunteer engagement + cumulative sponsor count" color={COLOR}><EmptyChartState /></ChartCard>;
+  if (isEmpty) return <ChartCard title="Volunteer Engagement" subtitle="Weekly volunteers engaged · cumulative total" color={COLOR}><EmptyChartState /></ChartCard>;
 
-  let cumSponsors = 0;
-  const chartData = data.map(d => {
-    cumSponsors += d.sponsors;
-    return { ...d, cumSponsors };
-  });
   const totalVolunteers = data.reduce((s, d) => s + d.volunteers, 0);
-  const totalSponsors = cumSponsors;
   const latestVolunteers = data[data.length - 1]?.volunteers || 0;
+  const avgVolunteers = data.length > 0 ? (totalVolunteers / data.length).toFixed(1) : 0;
 
-  const health = totalSponsors >= 2 && latestVolunteers >= 10 ? 'Strong'
-    : totalSponsors >= 1 || latestVolunteers >= 5 ? 'Building'
-    : 'Early Stage';
+  const health = latestVolunteers >= 10 ? 'Strong' : latestVolunteers >= 5 ? 'Building' : 'Early Stage';
   const healthColor = health === 'Strong' ? '#34d399' : health === 'Building' ? '#fbbf24' : '#f87171';
 
+  let cumVolunteers = 0;
+  const chartData = data.map(d => {
+    cumVolunteers += d.volunteers;
+    return { ...d, cumVolunteers };
+  });
+
   return (
-    <ChartCard title="Event Sponsors & Volunteers" subtitle="Weekly volunteer engagement + cumulative sponsor count" color={COLOR}
-      insight={`${totalSponsors} event sponsors secured YTD (target: 2). ${latestVolunteers} volunteers this week · ${totalVolunteers} total volunteer-weeks. ${totalSponsors >= 2 ? '✓ Sponsor target met!' : `${2 - totalSponsors} more sponsors needed.`}`}>
+    <ChartCard title="Volunteer Engagement" subtitle="Weekly volunteers engaged · cumulative total" color={COLOR}
+      insight={`${latestVolunteers} volunteers this week · ${totalVolunteers} total volunteer-weeks YTD · avg ${avgVolunteers}/week.`}>
       <div style={{
         background: healthColor + '15', border: `1px solid ${healthColor}40`,
         borderRadius: '8px', padding: '10px 14px', textAlign: 'center', marginBottom: '12px'
       }}>
-        <div style={{ fontSize: '10px', color: '#64748b', marginBottom: '2px' }}>Event Support Health</div>
+        <div style={{ fontSize: '10px', color: '#64748b', marginBottom: '2px' }}>Volunteer Health</div>
         <div style={{ fontSize: '18px', fontWeight: '800', color: healthColor }}>{health}</div>
       </div>
       <ResponsiveContainer width="100%" height={170}>
@@ -252,9 +250,8 @@ export function SponsorVolunteerChart({ history }) {
           <YAxis yAxisId="right" orientation="right" tick={{ fill: '#475569', fontSize: 10 }} allowDecimals={false} />
           <Tooltip content={<DarkTooltip />} />
           <Legend iconSize={8} wrapperStyle={{ fontSize: 11, color: '#64748b' }} />
-          <Bar yAxisId="left" dataKey="volunteers" fill={COLOR + '80'} name="Volunteers" radius={[3, 3, 0, 0]} />
-          <Line yAxisId="right" type="stepAfter" dataKey="cumSponsors" stroke="#fbbf24" strokeWidth={2.5} dot={{ r: 4, fill: '#fbbf24' }} name="Sponsors (cum.)" />
-          <ReferenceLine yAxisId="right" y={2} stroke="#10B981" strokeDasharray="4 4" label={{ value: 'Target 2', fill: '#10B981', fontSize: 10 }} />
+          <Bar yAxisId="left" dataKey="volunteers" fill={COLOR + '80'} name="Volunteers (week)" radius={[3, 3, 0, 0]} />
+          <Line yAxisId="right" type="monotone" dataKey="cumVolunteers" stroke={COLOR} strokeWidth={2.5} dot={{ r: 4, fill: COLOR }} name="Volunteers (cum.)" />
         </ComposedChart>
       </ResponsiveContainer>
       <AIInsightBox
@@ -262,10 +259,10 @@ export function SponsorVolunteerChart({ history }) {
         verdictColor={healthColor}
         text={
           health === 'Strong'
-            ? `${totalSponsors} sponsors and strong volunteer base of ${latestVolunteers}/week. Focus on retaining sponsors for next event cycle and converting volunteers into repeat contributors.`
+            ? `Strong volunteer base of ${latestVolunteers} this week. Focus on converting volunteers into repeat contributors and building a reliable roster for future events.`
             : health === 'Building'
-            ? `${totalSponsors} sponsor${totalSponsors !== 1 ? 's' : ''} secured. Continue outreach to reach the 2-sponsor target. Grow volunteer pool — aim for 10+ per event to ensure quality delivery.`
-            : `No sponsors or volunteers yet. Prioritise sponsor outreach this week and recruit volunteers via university and community channels.`
+            ? `${latestVolunteers} volunteers this week. Aim for 10+ per event — recruit via university and community channels to build the pool.`
+            : `No volunteers logged yet. Begin outreach to universities and community groups to build your volunteer pipeline.`
         }
       />
     </ChartCard>

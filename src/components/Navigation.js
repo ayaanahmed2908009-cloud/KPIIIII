@@ -7,7 +7,10 @@ export default function Navigation({ currentPage, onNavigate, currentUser, onLog
     { key: 'analytics', label: '📊 Analytics' },
     { key: 'dashboard', label: 'Dashboard' },
     { key: 'heatmap', label: 'Risk Heatmap' },
-    { key: 'directory', label: 'KPI Directory' }
+    { key: 'directory', label: 'KPI Directory' },
+    ...(currentUser && canSeeAll(currentUser.role)
+      ? [{ key: 'probability', label: '⚡ Probability Engine' }]
+      : [])
   ];
 
   const roleColor = currentUser

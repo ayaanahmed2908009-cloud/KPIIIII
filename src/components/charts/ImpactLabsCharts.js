@@ -25,6 +25,11 @@ function buildData(history) {
     citations: e.inputs.externalCitationsConfirmed || 0,
     submitted: e.inputs.findingsSubmittedExternally || 0,
     reportPct: e.inputs.annualReportPercentComplete || 0,
+    institutionsPartnered: e.inputs.institutionsPartnered || 0,
+    jointProjectsActive: e.inputs.jointProjectsActive || 0,
+    coAuthoredYTD: e.inputs.coAuthoredPublicationsYTD || 0,
+    pipeline: e.inputs.partnershipPipelineCount || 0,
+    grants: e.inputs.grantProposalsSubmitted || 0,
   }));
   return { data, isEmpty: false };
 }
@@ -226,6 +231,89 @@ export function AnnualReportProgress({ history }) {
         verdictColor={color}
         text={`At ${pct}% completion${estimatedWeek !== '—' ? `, estimated Week ${estimatedWeek} delivery` : ''}. ${pct < 25 ? 'Focus on completing the research and data gathering phase before drafting begins.' : pct < 50 ? 'Priority: complete the first full draft. Assign dedicated writing blocks each week.' : pct < 75 ? 'Enter review phase — circulate draft to stakeholders for feedback.' : 'Final review and publication. Confirm external submission dates.'}`}
       />
+    </ChartCard>
+  );
+}
+
+// 6 — Research Partnership Dashboard
+export function ResearchPartnershipChart({ history }) {
+  const { data, isEmpty } = buildData(history);
+  if (isEmpty) return <ChartCard title="Research Institution Partnerships" subtitle="Partnership pipeline · signed agreements · co-authored outputs" color={COLOR}><EmptyChartState /></ChartCard>;
+
+  const latest = data[data.length - 1];
+  const partnered = latest?.institutionsPartnered || 0;
+  const active = latest?.jointProjectsActive || 0;
+  const coAuthored = latest?.coAuthoredYTD || 0;
+  const pipeline = latest?.pipeline || 0;
+  const grants = latest?.grants || 0;
+
+  // Y1 targets
+  const partnerTarget = 2;
+  const coAuthorTarget = 1;
+
+  // Pace: how many weeks until we expect to hit Y1 partner target
+  const weeklyPartnerRate = data.length > 1
+    ? (partnered / data.length).toFixed(3)
+    : 0;
+  const projectedByWeek52 = Math.round(weeklyPartnerRate * 52);
+
+  // Chart: pipeline funnel over time
+  const chartData = data.map(d => ({
+    week: d.week,
+    pipeline: d.pipeline,
+    partnered: d.institutionsPartnered,
+    coAuthored: d.coAuthoredYTD,
+  }));
+
+  const stats = [
+    { label: 'Signed Partners', value: partnered, target: partnerTarget, color: '#34d399', icon: '🤝' },
+    { label: 'Active Projects', value: active, color: '#60a5fa', icon: '🔬' },
+    { label: 'Co-authored YTD', value: coAuthored, target: coAuthorTarget, color: '#a78bfa', icon: '📄' },
+    { label: 'Pipeline', value: pipeline, color: '#fbbf24', icon: '🔮' },
+  ];
+
+  return (
+    <ChartCard
+      title="Research Institution Partnerships"
+      subtitle="Partnership pipeline · signed agreements · co-authored outputs"
+      color={COLOR}
+      insight={`${partnered}/${partnerTarget} institutions signed (Y1 target). ${pipeline} in pipeline. ${coAuthored} co-authored publication${coAuthored !== 1 ? 's' : ''} YTD. ${grants > 0 ? `${grants} grant proposal${grants !== 1 ? 's' : ''} submitted.` : 'No grant proposals submitted yet.'} ${projectedByWeek52 >= partnerTarget ? '✓ On pace for Y1.' : `⚠ At current pace, projected ${projectedByWeek52} partners by year-end.`}`}
+    >
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
+        {stats.map((s, i) => (
+          <div key={i} style={{
+            background: '#0f172a', border: `1px solid ${s.color}30`,
+            borderLeft: `3px solid ${s.color}`,
+            borderRadius: '8px', padding: '12px 14px',
+            display: 'flex', alignItems: 'center', gap: '10px'
+          }}>
+            <span style={{ fontSize: '20px' }}>{s.icon}</span>
+            <div>
+              <div style={{ fontSize: '20px', fontWeight: '800', color: s.color }}>
+                {s.value}
+                {s.target !== undefined && <span style={{ fontSize: '12px', color: '#475569', fontWeight: '400' }}>/{s.target}</span>}
+              </div>
+              <div style={{ fontSize: '11px', color: '#475569' }}>{s.label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {chartData.length > 1 && (
+        <ResponsiveContainer width="100%" height={160}>
+          <ComposedChart data={chartData} margin={CHART_DEFAULTS.margin}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+            <XAxis dataKey="week" tick={{ fill: '#475569', fontSize: 10 }} tickFormatter={v => v < 1 ? `T${v + 2}` : `Wk ${v}`} />
+            <YAxis tick={{ fill: '#475569', fontSize: 10 }} allowDecimals={false} />
+            <Tooltip content={<DarkTooltip />} />
+            <Legend iconSize={8} wrapperStyle={{ fontSize: 11, color: '#64748b' }} />
+            <ReferenceLine y={partnerTarget} stroke="#10B981" strokeDasharray="4 4" label={{ value: `Y1 target ${partnerTarget}`, fill: '#10B981', fontSize: 10 }} />
+            <Bar dataKey="pipeline" fill="#fbbf2440" name="Pipeline" radius={[3, 3, 0, 0]} />
+            <Line type="monotone" dataKey="partnered" stroke="#34d399" strokeWidth={2.5} dot={{ r: 4, fill: '#34d399' }} name="Signed partners" />
+            <Line type="monotone" dataKey="coAuthored" stroke="#a78bfa" strokeWidth={2} dot={{ r: 3, fill: '#a78bfa' }} name="Co-authored YTD" strokeDasharray="4 2" />
+          </ComposedChart>
+        </ResponsiveContainer>
+      )}
     </ChartCard>
   );
 }

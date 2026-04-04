@@ -6,6 +6,7 @@ import KPIDirectory from './pages/KPIDirectory';
 import Analytics from './pages/Analytics';
 import Login from './pages/Login';
 import AnalysisReport from './pages/AnalysisReport';
+import ProbabilityEngine from './pages/ProbabilityEngine';
 import { loadHistory, saveHistory, loadAnalysisHistory, saveAnalysisHistory } from './utils/storage';
 import { getCurrentWeekNumber, getCurrentFYWeek, dateToFYWeek } from './utils/analysisHelpers';
 import { loadSession, clearSession, canRunAnalysis, canSeeAll } from './auth/users';
@@ -201,6 +202,11 @@ export default function App() {
       )}
       {currentPage === 'directory' && (
         <KPIDirectory currentUser={currentUser} />
+      )}
+      {currentPage === 'probability' && (
+        <ProbabilityEngine
+          analysisHistory={analysisHistory}
+        />
       )}
 
       {/* Full-screen analysis briefing report */}

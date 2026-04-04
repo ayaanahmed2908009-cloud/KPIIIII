@@ -198,6 +198,15 @@ export const KPI_DIRECTORY = {
         feedingFields: ['External citations confirmed this week', 'SolarPak findings submitted externally this week'],
         probabilityCalc: 'Projects cumulative confirmed citations toward 2 using current pace, with a boost from recent external submission activity in a 6-week rolling window.',
         frequency: 'Weekly'
+      },
+      {
+        id: 'researchPartnerships',
+        name: 'Research Institution Partnerships',
+        description: 'Number of universities or research institutions with a signed MOU or formal partnership agreement for joint research with Impact Labs.',
+        targets: { year1: '2', year2: '5', year3: '10' },
+        feedingFields: ['Institutions partnered (cumulative)', 'Joint projects currently active', 'Co-authored publications YTD', 'Partnership pipeline count', 'Grant proposals submitted YTD'],
+        probabilityCalc: 'Projects cumulative institutions partnered toward the annual target using current signing pace, boosted by pipeline size as a leading indicator of future conversions.',
+        frequency: 'Weekly'
       }
     ]
   },
@@ -250,15 +259,6 @@ export const KPI_DIRECTORY = {
         probabilityCalc: 'Calculates the cumulative repeat attendee rate across all completed events and projects toward the 15% annual target.',
         frequency: 'Event-triggered'
       },
-      {
-        id: 'eventsWithSponsor',
-        name: 'Events with a Confirmed Sponsor',
-        description: 'Number of events that have at least one confirmed external sponsor or partner.',
-        targets: { year1: '1', year2: '4', year3: '10' },
-        feedingFields: ['Events with a confirmed sponsor YTD', 'Sponsor or partner conversations held this week'],
-        probabilityCalc: 'Projects events with a confirmed sponsor YTD toward 1, boosted by active sponsor pipeline conversations.',
-        frequency: 'Weekly'
-      }
     ]
   }
 };
@@ -305,7 +305,12 @@ export const DEFAULT_WEEK_INPUTS = {
     dataAccuracyAuditScore: 0,
     externalCitationsConfirmed: 0,
     findingsSubmittedExternally: 0,
-    annualReportPercentComplete: 0
+    annualReportPercentComplete: 0,
+    institutionsPartnered: 0,
+    jointProjectsActive: 0,
+    coAuthoredPublicationsYTD: 0,
+    partnershipPipelineCount: 0,
+    grantProposalsSubmitted: 0
   },
   events: {
     eventsHeldThisWeek: 0,
@@ -314,7 +319,6 @@ export const DEFAULT_WEEK_INPUTS = {
     totalAttendeesYTD: 0,
     attendeeSatisfactionScore: 0,
     repeatAttendeePercentage: 0,
-    eventSponsorsSecured: 0,
     volunteersEngaged: 0,
     schoolsReachedYTD: 0
   }
@@ -360,7 +364,12 @@ export const TEAM_INPUT_FIELDS = {
     { key: 'dataAccuracyAuditScore', label: 'Data accuracy audit score (%)', type: 'decimal', badge: 'QUARTERLY', note: 'Enter 0 in non-audit weeks' },
     { key: 'externalCitationsConfirmed', label: 'External citations confirmed this week', type: 'integer', note: '' },
     { key: 'findingsSubmittedExternally', label: 'SolarPak findings submitted externally this week', type: 'binary', note: '1 = yes, 0 = no' },
-    { key: 'annualReportPercentComplete', label: 'Annual impact report % complete', type: 'integer', note: 'Enter 0 in non-update weeks; update monthly' }
+    { key: 'annualReportPercentComplete', label: 'Annual impact report % complete', type: 'integer', note: 'Enter 0 in non-update weeks; update monthly' },
+    { key: 'institutionsPartnered', label: 'Research institutions partnered (cumulative, signed agreements)', type: 'integer', note: 'Current absolute count — only goes up' },
+    { key: 'jointProjectsActive', label: 'Joint research projects currently active', type: 'integer', note: 'Live count — can go up or down' },
+    { key: 'coAuthoredPublicationsYTD', label: 'Co-authored publications YTD', type: 'integer', note: 'Current absolute count — only goes up' },
+    { key: 'partnershipPipelineCount', label: 'Institutions in active partnership conversations (no agreement yet)', type: 'integer', note: 'Leading indicator' },
+    { key: 'grantProposalsSubmitted', label: 'Grant proposals submitted YTD (joint)', type: 'integer', note: 'Enter 0 in non-submission weeks; cumulative' }
   ],
   events: [
     { key: 'eventsHeldThisWeek', label: 'Events held this week', type: 'integer', note: '' },
@@ -369,7 +378,6 @@ export const TEAM_INPUT_FIELDS = {
     { key: 'totalAttendeesYTD', label: 'Total attendees YTD', type: 'integer', note: 'Current absolute count' },
     { key: 'attendeeSatisfactionScore', label: 'Attendee satisfaction score (%)', type: 'decimal', badge: 'EVENT-TRIGGERED', note: 'Enter 0 in non-event weeks' },
     { key: 'repeatAttendeePercentage', label: 'Repeat attendee percentage (%)', type: 'decimal', badge: 'EVENT-TRIGGERED', note: 'Enter 0 in non-event weeks' },
-    { key: 'eventSponsorsSecured', label: 'Event sponsors secured this week', type: 'integer', note: '' },
     { key: 'volunteersEngaged', label: 'Volunteers engaged this week', type: 'integer', note: '' },
     { key: 'schoolsReachedYTD', label: 'Schools reached YTD', type: 'integer', note: 'Current absolute count' }
   ]

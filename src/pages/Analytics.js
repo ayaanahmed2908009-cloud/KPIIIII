@@ -4,7 +4,7 @@ import { AIConfidenceBriefing } from '../components/charts/AIConfidenceBriefing'
 import { FollowerGrowthChart, EngagementGaugeChart, ContentMixChart, PressFunnelChart, MomentumCard } from '../components/charts/MarketingCharts';
 import { FundraisingThermometer, PartnerPipelineKanban, WeeklyFundsChart, ConversionRateChart, DealHealthCard } from '../components/charts/SponsorshipCharts';
 import { HeadcountChart, OKRHeatmapChart, RetentionDonutChart, SatisfactionChart, SelfVsAIChart } from '../components/charts/GeneralMgmtCharts';
-import { ArticlePipelineChart, PublicationPaceChart, ReportQualityChart, AnnualReportProgress, ExternalReachChart } from '../components/charts/ImpactLabsCharts';
+import { ArticlePipelineChart, PublicationPaceChart, ReportQualityChart, AnnualReportProgress, ExternalReachChart, ResearchPartnershipChart } from '../components/charts/ImpactLabsCharts';
 import { EventCalendarHeatmap, AttendeeTrackerChart, SatisfactionDotPlot, RepeatAttendeeGauge, SponsorVolunteerChart } from '../components/charts/EventsCharts';
 
 const TEAM_CONFIG = [
@@ -58,6 +58,7 @@ const TEAM_CONFIG = [
       <ReportQualityChart key="3" history={history} />,
       <AnnualReportProgress key="4" history={history} />,
       <ExternalReachChart key="5" history={history} />,
+      <ResearchPartnershipChart key="6" history={history} />,
     ],
   },
   {
@@ -97,7 +98,7 @@ function TeamSection({ team, history, analysisHistory, defaultOpen }) {
         <span style={{ fontSize: '22px' }}>{team.icon}</span>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: '15px', fontWeight: '700', color: '#f1f5f9' }}>{team.label}</div>
-          <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>5 charts · click to {open ? 'collapse' : 'expand'}</div>
+          <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>{charts.length} charts · click to {open ? 'collapse' : 'expand'}</div>
         </div>
         <span style={{ fontSize: '18px', color: team.color, transition: 'transform 0.2s', transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}>▼</span>
       </button>
