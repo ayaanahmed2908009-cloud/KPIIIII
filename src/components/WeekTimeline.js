@@ -3,7 +3,7 @@ import {
   FISCAL_LABEL, FISCAL_START,
   getCurrentFiscalWeek, getWeekShortLabel, getWeekFullLabel,
   getQuarterGroups, getSubmittedWeeks, getWeekEntries,
-  isWeekPast, isWeekCurrent, isWeekFuture
+  isWeekPast, isWeekCurrent, isWeekFuture, formatDeadlineShort
 } from '../utils/fiscalYear';
 import { TEAM_COLORS, TEAM_LABELS } from '../data/kpiData';
 import { getVisibleTeams, canSeeAll } from '../auth/users';
@@ -12,7 +12,7 @@ import { TRIAL_WEEK_DATES } from '../data/seedData';
 
 const QUARTER_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EC4899'];
 
-function WeekTile({ weekNum, submitted, submittedTeams, totalTeams, isCurrentWeek, isPast, isFuture, teamColor, onClick }) {
+function WeekTile({ weekNum, submitted, submittedTeams, totalTeams, isCurrentWeek, isPast, isFuture, teamColor, onClick, deadlineLabel }) {
   const [hovered, setHovered] = useState(false);
 
   let bg, border, textColor;
@@ -71,9 +71,16 @@ function WeekTile({ weekNum, submitted, submittedTeams, totalTeams, isCurrentWee
       {/* Status indicators */}
       <div style={{ marginTop: '4px', display: 'flex', gap: '2px', flexWrap: 'wrap', justifyContent: 'center' }}>
         {isCurrentWeek && (
-          <span style={{ fontSize: '7px', background: '#F59E0B20', color: '#F59E0B', borderRadius: '3px', padding: '0 3px', fontWeight: '700' }}>
-            NOW
-          </span>
+          <>
+            <span style={{ fontSize: '7px', background: '#F59E0B20', color: '#F59E0B', borderRadius: '3px', padding: '0 3px', fontWeight: '700' }}>
+              NOW
+            </span>
+            {deadlineLabel && (
+              <span style={{ fontSize: '6px', background: '#7c3aed20', color: '#a78bfa', borderRadius: '3px', padding: '0 3px', fontWeight: '700', marginTop: '1px' }}>
+                {deadlineLabel}
+              </span>
+            )}
+          </>
         )}
         {!isCurrentWeek && submittedTeams > 0 && totalTeams > 1 && (
           <span style={{ fontSize: '7px', color: textColor, opacity: 0.8 }}>
@@ -115,6 +122,9 @@ export default function WeekTimeline({ history, currentUser }) {
   const totalSubmitted = new Set(history.filter(e => visibleTeams.includes(e.team)).map(e => e.weekNumber)).size;
   const pastWeeks = currentFiscalWeek <= 0 ? 0 : Math.min(currentFiscalWeek - 1, 52);
   const completionRate = pastWeeks > 0 ? Math.round((totalSubmitted / pastWeeks) * 100) : 0;
+  const deadlineLabel = currentFiscalWeek > 0 && currentFiscalWeek <= 52
+    ? formatDeadlineShort(currentFiscalWeek)
+    : null;
 
   return (
     <div style={{
@@ -165,6 +175,12 @@ export default function WeekTimeline({ history, currentUser }) {
                     {completionRate}%
                   </div>
                   <div style={{ fontSize: '9px', color: '#475569' }}>Fill rate</div>
+                </div>
+              )}
+              {deadlineLabel && (
+                <div style={{ background: '#2d1657', border: '1px solid #7c3aed50', borderRadius: '8px', padding: '6px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '13px', fontWeight: '800', color: '#a78bfa' }}>{deadlineLabel}</div>
+                  <div style={{ fontSize: '9px', color: '#7c3aed' }}>Due 5:00 PM</div>
                 </div>
               )}
             </>
@@ -281,6 +297,7 @@ export default function WeekTimeline({ history, currentUser }) {
                   isFuture={isFuture}
                   teamColor={teamColor}
                   onClick={() => setSelectedWeek(weekNum)}
+                  deadlineLabel={isCurrent ? deadlineLabel : null}
                 />
               );
             })}

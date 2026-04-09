@@ -22,6 +22,89 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// ─── Persistent JSON data store ───────────────────────────────────────────────
+// DATA_DIR env var lets you point this at a Railway persistent volume (/data).
+// Without a volume the file lives next to server.js and is lost on redeploy,
+// but all users still share the same data while the server is running.
+const DATA_DIR  = process.env.DATA_DIR || path.join(__dirname, 'data');
+const DATA_FILE = path.join(DATA_DIR, 'kpi-data.json');
+
+function readData() {
+  try {
+    if (!fs.existsSync(DATA_FILE)) return { history: [], analyses: [] };
+    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  } catch {
+    return { history: [], analyses: [] };
+  }
+}
+
+function writeData(data) {
+  try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    // Write to a temp file then rename for atomicity
+    const tmp = DATA_FILE + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
+    fs.renameSync(tmp, DATA_FILE);
+  } catch (err) {
+    console.error('[data] Write error:', err);
+  }
+}
+
+// GET /api/history — return all weekly input entries
+app.get('/api/history', (req, res) => {
+  const data = readData();
+  res.json({ history: data.history });
+});
+
+// POST /api/history — upsert a single weekly entry (replaces same team+week)
+app.post('/api/history', (req, res) => {
+  const entry = req.body;
+  if (!entry || !entry.team || entry.weekNumber === undefined) {
+    return res.status(400).json({ error: 'Invalid entry' });
+  }
+  const data = readData();
+  data.history = data.history.filter(
+    e => !(e.team === entry.team && e.weekNumber === entry.weekNumber)
+  );
+  data.history.push(entry);
+  writeData(data);
+  res.json({ success: true });
+});
+
+// DELETE /api/history — clear all weekly entries
+app.delete('/api/history', (req, res) => {
+  const data = readData();
+  data.history = [];
+  writeData(data);
+  res.json({ success: true });
+});
+
+// GET /api/analysis — return all analysis history entries
+app.get('/api/analysis', (req, res) => {
+  const data = readData();
+  res.json({ analyses: data.analyses });
+});
+
+// POST /api/analysis — append a new analysis entry
+app.post('/api/analysis', (req, res) => {
+  const entry = req.body;
+  if (!entry || !entry.weekNumber || !entry.analysis) {
+    return res.status(400).json({ error: 'Invalid entry' });
+  }
+  const data = readData();
+  data.analyses.push(entry);
+  writeData(data);
+  res.json({ success: true });
+});
+
+// DELETE /api/analysis — clear all analysis entries
+app.delete('/api/analysis', (req, res) => {
+  const data = readData();
+  data.analyses = [];
+  writeData(data);
+  res.json({ success: true });
+});
+
 // Lazy-init so missing key doesn't crash the server on startup
 let anthropic = null;
 function getAnthropic() {
@@ -37,11 +120,6 @@ const YEAR1_TARGETS = {
     postsPerMonth: 12,
     postVideoRatio: '2:1',
     pressMentions: 4
-  },
-  sponsorships: {
-    activePartners: 1,
-    conversionRate: '20%',
-    totalFundraising: 10000
   },
   generalManagement: {
     activeMembers: 22,
@@ -134,7 +212,7 @@ ${targetsStr}
 COMPLETE WEEKLY INPUT HISTORY — ${history.length} entries, chronological (oldest first, most recent last):
 ${historyStr}
 
-For each KPI across all five teams, calculate the probability (0–100%) that the team will hit that KPI's annual target by end of year. Base this on the FULL TREND across all weeks — not just the latest entry.
+For each KPI across all four teams, calculate the probability (0–100%) that the team will hit that KPI's annual target by end of year. Base this on the FULL TREND across all weeks — not just the latest entry.
 
 If fewer than 4 weeks of real FY data exist (week number ≥ 1), set low_confidence to true.
 
@@ -151,16 +229,6 @@ Return ONLY this JSON structure, no preamble, no markdown fences:
       {"name": "Posts Per Month", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Post to Video Ratio", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Press Mentions Per Year", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"}
-    ]
-  },
-  "sponsorships": {
-    "overallProbability": <integer 0-100>,
-    "low_confidence": <boolean>,
-    "diagnosis": "<2-3 sentences>",
-    "kpis": [
-      {"name": "Active Institutional Partners", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
-      {"name": "Outreach Conversion Rate", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
-      {"name": "Total Fundraising", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"}
     ]
   },
   "generalManagement": {

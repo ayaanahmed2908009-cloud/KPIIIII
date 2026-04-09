@@ -1,6 +1,5 @@
 export const TEAM_COLORS = {
   marketing: '#3B82F6',
-  sponsorships: '#10B981',
   generalManagement: '#8B5CF6',
   impactLabs: '#F59E0B',
   events: '#EF4444'
@@ -8,7 +7,6 @@ export const TEAM_COLORS = {
 
 export const TEAM_LABELS = {
   marketing: 'Marketing & Social Media',
-  sponsorships: 'Sponsorships & Fundraising',
   generalManagement: 'General Management',
   impactLabs: 'Impact Labs',
   events: 'Events & Community Outreach'
@@ -62,39 +60,6 @@ export const KPI_DIRECTORY = {
         targets: { year1: '4', year2: '10', year3: '20' },
         feedingFields: ['Press mentions confirmed this week', 'Press contacts reached out to this week'],
         probabilityCalc: 'Projects confirmed press mentions YTD toward the annual target of 4, weighted by the outreach pipeline activity.',
-        frequency: 'Weekly'
-      }
-    ]
-  },
-  sponsorships: {
-    label: 'Sponsorships & Fundraising',
-    color: '#10B981',
-    kpis: [
-      {
-        id: 'activePartners',
-        name: 'Active Institutional Partners',
-        description: 'Number of institutional organisations with a formalised, active partnership with SolarPak.',
-        targets: { year1: '1', year2: '3', year3: '6' },
-        feedingFields: ['Total active partners right now', 'New partnerships formalised this week'],
-        probabilityCalc: 'Checks whether at least 1 active partner has been confirmed and projects pipeline conversion rates toward securing additional partners.',
-        frequency: 'Weekly'
-      },
-      {
-        id: 'conversionRate',
-        name: 'Outreach Meeting Conversion Rate',
-        description: 'Percentage of outreach meetings held that result in a formalised partnership.',
-        targets: { year1: '20%', year2: '30%', year3: '35%' },
-        feedingFields: ['Outreach meetings held this week', 'New partnerships formalised this week'],
-        probabilityCalc: 'Divides cumulative partnerships formalised by total outreach meetings held YTD and assesses the probability of reaching 20%.',
-        frequency: 'Weekly'
-      },
-      {
-        id: 'totalFundraising',
-        name: 'Total Fundraising Per Year',
-        description: 'Total funds raised or committed by institutional partners and fundraising activities in the year.',
-        targets: { year1: '$10,000', year2: '$20,000', year3: '$40,000' },
-        feedingFields: ['Total funds raised YTD in USD', 'Funds raised or committed this week in USD'],
-        probabilityCalc: 'Projects total YTD funds raised toward $10,000 using the current weekly average fundraising rate.',
         frequency: 'Weekly'
       }
     ]
@@ -263,7 +228,7 @@ export const KPI_DIRECTORY = {
   }
 };
 
-export const TEAM_KEYS = ['marketing', 'sponsorships', 'generalManagement', 'impactLabs', 'events'];
+export const TEAM_KEYS = ['marketing', 'generalManagement', 'impactLabs', 'events'];
 
 export const DEFAULT_WEEK_INPUTS = {
   marketing: {
@@ -274,15 +239,6 @@ export const DEFAULT_WEEK_INPUTS = {
     avgEngagementRate: 0,
     pressContactsReached: 0,
     pressMentionsConfirmed: 0
-  },
-  sponsorships: {
-    outreachMeetingsHeld: 0,
-    prospectsOutreachStage: 0,
-    prospectsMeetingStage: 0,
-    newPartnershipsFormalised: 0,
-    totalActivePartners: 0,
-    fundsRaisedThisWeek: 0,
-    totalFundsRaisedYTD: 0
   },
   generalManagement: {
     newMembersJoined: 0,
@@ -333,15 +289,6 @@ export const TEAM_INPUT_FIELDS = {
     { key: 'avgEngagementRate', label: 'Average engagement rate this week (%)', type: 'decimal', note: 'e.g. 3.2' },
     { key: 'pressContactsReached', label: 'Press contacts reached out to this week', type: 'integer', note: '' },
     { key: 'pressMentionsConfirmed', label: 'Press mentions confirmed this week', type: 'integer', note: '' }
-  ],
-  sponsorships: [
-    { key: 'outreachMeetingsHeld', label: 'Outreach meetings held this week', type: 'integer', note: '' },
-    { key: 'prospectsOutreachStage', label: 'Prospects currently in outreach stage', type: 'integer', note: 'Infographic only' },
-    { key: 'prospectsMeetingStage', label: 'Prospects currently in meeting stage', type: 'integer', note: 'Infographic only' },
-    { key: 'newPartnershipsFormalised', label: 'New partnerships formalised this week', type: 'integer', note: '' },
-    { key: 'totalActivePartners', label: 'Total active partners right now', type: 'integer', note: 'Current absolute count' },
-    { key: 'fundsRaisedThisWeek', label: 'Funds raised or committed this week (USD)', type: 'integer', note: '' },
-    { key: 'totalFundsRaisedYTD', label: 'Total funds raised YTD (USD)', type: 'integer', note: 'Current absolute count' }
   ],
   generalManagement: [
     { key: 'newMembersJoined', label: 'New members joined this week', type: 'integer', note: '' },

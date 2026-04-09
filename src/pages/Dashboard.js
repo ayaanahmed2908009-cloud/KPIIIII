@@ -7,7 +7,7 @@ import {
 import { exportHistory, clearAll } from '../utils/storage';
 import { getVisibleTeams, canSeeAll } from '../auth/users';
 import WeekTimeline from '../components/WeekTimeline';
-import { getCurrentFiscalWeek, getWeekShortLabel, FISCAL_START } from '../utils/fiscalYear';
+import { getCurrentFiscalWeek, getWeekShortLabel, FISCAL_START, formatDeadlineShort } from '../utils/fiscalYear';
 
 // ─── Executive Score Card ──────────────────────────────────────────────────────
 function ExecutiveScoreCard({ score, analysisDate, weekNumber }) {
@@ -33,7 +33,31 @@ function ExecutiveScoreCard({ score, analysisDate, weekNumber }) {
       <div style={{ textAlign: 'right' }}>
         <div style={{ fontSize: '11px', color: '#475569', marginBottom: '4px' }}>Last analysis</div>
         <div style={{ fontSize: '13px', color: '#94a3b8' }}>{analysisDate ? formatDate(analysisDate) : 'Never'}</div>
-        <div style={{ fontSize: '11px', color: '#475569', marginTop: '8px' }}>Composite of all 5 teams' avg KPI probabilities</div>
+        <div style={{ fontSize: '11px', color: '#475569', marginTop: '8px' }}>Composite of all 4 teams' avg KPI probabilities</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Deadline Notice Banner ───────────────────────────────────────────────────
+function DeadlineNotice({ fiscalWeek }) {
+  if (fiscalWeek <= 0) return null;
+  const deadlineStr = formatDeadlineShort(fiscalWeek);
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: '12px',
+      background: '#1a0f2e', border: '1px solid #7c3aed40',
+      borderLeft: '4px solid #7c3aed', borderRadius: '8px',
+      padding: '10px 16px', marginBottom: '16px'
+    }}>
+      <span style={{ fontSize: '16px' }}>⏰</span>
+      <div>
+        <span style={{ fontSize: '13px', fontWeight: '700', color: '#c4b5fd' }}>
+          Weekly inputs must be submitted by {deadlineStr} at 5:00 PM.
+        </span>
+        <span style={{ fontSize: '12px', color: '#7c3aed', marginLeft: '8px' }}>
+          Late submissions are accepted but may not be counted in that week's analysis.
+        </span>
       </div>
     </div>
   );
@@ -481,7 +505,7 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
             background: 'transparent', color: '#94a3b8', fontSize: '13px',
             cursor: history.length === 0 ? 'not-allowed' : 'pointer', fontFamily: 'inherit'
           }}>↓ Export JSON</button>
-          <button onClick={() => { if (window.confirm('Clear all history and analysis? This cannot be undone.')) { clearAll(); window.location.reload(); } }} style={{
+          <button onClick={async () => { if (window.confirm('Clear all history and analysis? This cannot be undone.')) { await clearAll(); window.location.reload(); } }} style={{
             padding: '10px 16px', borderRadius: '8px', border: '1px solid #7f1d1d',
             background: 'transparent', color: '#ef4444', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit'
           }}>Reset All</button>
@@ -516,7 +540,7 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
             background: 'transparent', color: '#94a3b8', fontSize: '13px',
             cursor: history.length === 0 ? 'not-allowed' : 'pointer', fontFamily: 'inherit'
           }}>↓ Export JSON</button>
-          <button onClick={() => { if (window.confirm('Clear all history and analysis? This cannot be undone.')) { clearAll(); window.location.reload(); } }} style={{
+          <button onClick={async () => { if (window.confirm('Clear all history and analysis? This cannot be undone.')) { await clearAll(); window.location.reload(); } }} style={{
             padding: '10px 16px', borderRadius: '8px', border: '1px solid #7f1d1d',
             background: 'transparent', color: '#ef4444', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit'
           }}>Reset All</button>
@@ -541,6 +565,7 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
         {/* GM — My Inputs tab */}
         {gmTab === 'myInputs' && (
           <div>
+            <DeadlineNotice fiscalWeek={fiscalWeek} />
             <WeekTimeline history={history} currentUser={currentUser} />
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
               <label style={{ fontSize: '13px', color: '#64748b' }}>Submitting for week:</label>
@@ -592,8 +617,11 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
       }}>
         <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>Your team</div>
         <div style={{ fontSize: '22px', fontWeight: '800', color: TEAM_COLORS[currentUser.role] }}>{TEAM_LABELS[currentUser.role]}</div>
-        <div style={{ fontSize: '13px', color: '#475569', marginTop: '6px' }}>Submit your weekly inputs below. The AI analysis is run by General Management or the CEO.</div>
+        <div style={{ fontSize: '13px', color: '#475569', marginTop: '6px' }}>Submit your weekly inputs below by <span style={{ color: '#c4b5fd', fontWeight: '600' }}>Friday 5:00 PM</span> each week. The AI analysis is run by General Management or the CEO.</div>
       </div>
+
+      {/* Deadline notice */}
+      <DeadlineNotice fiscalWeek={fiscalWeek} />
 
       {/* Week timeline */}
       <WeekTimeline history={history} currentUser={currentUser} />

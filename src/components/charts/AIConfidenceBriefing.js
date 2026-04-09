@@ -7,7 +7,6 @@ import { EmptyChartState } from './ChartShared';
 
 const TEAM_COLORS = {
   marketing: '#3B82F6',
-  sponsorships: '#10B981',
   generalManagement: '#8B5CF6',
   impactLabs: '#F59E0B',
   events: '#EC4899',
@@ -15,7 +14,6 @@ const TEAM_COLORS = {
 
 const TEAM_LABELS = {
   marketing: 'Marketing',
-  sponsorships: 'Sponsorships',
   generalManagement: 'General Mgmt',
   impactLabs: 'Impact Labs',
   events: 'Events',
@@ -25,7 +23,7 @@ function getCompositeProb(analysisHistory) {
   if (!analysisHistory || analysisHistory.length === 0) return null;
   const latest = analysisHistory[analysisHistory.length - 1];
   if (!latest?.analysis) return null;
-  const teams = ['marketing', 'sponsorships', 'generalManagement', 'impactLabs', 'events'];
+  const teams = ['marketing', 'generalManagement', 'impactLabs', 'events'];
   const probs = teams.map(t => latest.analysis[t]?.overallProbability).filter(p => p != null);
   if (probs.length === 0) return null;
   return Math.round(probs.reduce((s, p) => s + p, 0) / probs.length);
@@ -35,7 +33,7 @@ function getTeamProbs(analysisHistory) {
   if (!analysisHistory || analysisHistory.length === 0) return null;
   const latest = analysisHistory[analysisHistory.length - 1];
   if (!latest?.analysis) return null;
-  const teams = ['marketing', 'sponsorships', 'generalManagement', 'impactLabs', 'events'];
+  const teams = ['marketing', 'generalManagement', 'impactLabs', 'events'];
   const result = {};
   teams.forEach(t => {
     result[t] = latest.analysis[t]?.overallProbability ?? null;
@@ -67,7 +65,7 @@ export function AIConfidenceBriefing({ history, analysisHistory }) {
           </span>
         </div>
         <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '16px' }}>
-          Composite target achievement probability across all 5 SolarPak teams
+          Composite target achievement probability across all 4 SolarPak teams
         </div>
         <EmptyChartState message="Run AI Analysis to generate your executive confidence briefing" />
       </div>
@@ -76,7 +74,7 @@ export function AIConfidenceBriefing({ history, analysisHistory }) {
 
   const probs = aiProbs;
   const composite = compositeFromAI;
-  const teams = ['marketing', 'sponsorships', 'generalManagement', 'impactLabs', 'events'];
+  const teams = ['marketing', 'generalManagement', 'impactLabs', 'events'];
 
   const radarData = teams.map(t => ({
     team: TEAM_LABELS[t],
@@ -130,7 +128,7 @@ export function AIConfidenceBriefing({ history, analysisHistory }) {
             </span>
           </div>
           <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
-            Composite target achievement probability across all 5 SolarPak teams
+            Composite target achievement probability across all 4 SolarPak teams
           </div>
         </div>
         <button onClick={() => setExpanded(e => !e)} style={{

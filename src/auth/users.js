@@ -5,42 +5,35 @@
 export const USERS = [
   {
     username: 'ceo',
-    password: 'solar2026',
+    password: 'Px4Nk9Wm',
     role: 'ceo',
     label: 'CEO',
     team: null   // CEO has no single team — sees everything
   },
   {
     username: 'general',
-    password: 'manage2026',
+    password: 'Bz7Rq2Xv',
     role: 'generalManagement',
     label: 'General Management',
     team: 'generalManagement'
   },
   {
     username: 'marketing',
-    password: 'market2026',
+    password: 'Tj5Jv8Lf',
     role: 'marketing',
     label: 'Marketing & Social Media',
     team: 'marketing'
   },
   {
-    username: 'sponsorships',
-    password: 'sponsor2026',
-    role: 'sponsorships',
-    label: 'Sponsorships & Fundraising',
-    team: 'sponsorships'
-  },
-  {
     username: 'impactlabs',
-    password: 'impact2026',
+    password: 'Gn3Hc6Yw',
     role: 'impactLabs',
     label: 'Impact Labs',
     team: 'impactLabs'
   },
   {
     username: 'events',
-    password: 'events2026',
+    password: 'Kw9Mb4Fs',
     role: 'events',
     label: 'Events & Community Outreach',
     team: 'events'
@@ -65,7 +58,7 @@ export function canRunAnalysis(role) {
 
 // Returns the array of team keys visible to this role
 export function getVisibleTeams(role) {
-  if (canSeeAll(role)) return ['marketing', 'sponsorships', 'generalManagement', 'impactLabs', 'events'];
+  if (canSeeAll(role)) return ['marketing', 'generalManagement', 'impactLabs', 'events'];
   // Team lead sees only their own team
   return [role];
 }

@@ -97,6 +97,22 @@ function range(start, end) {
   return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 }
 
+/**
+ * Returns the Friday deadline Date for a given fiscal week.
+ * FY starts on Wednesday Apr 1 2026, so Friday = start + 2 days.
+ */
+export function getWeekDeadline(weekNum) {
+  const d = new Date(FISCAL_START);
+  d.setDate(d.getDate() + (weekNum - 1) * 7 + 2); // Wed + 2 = Fri
+  return d;
+}
+
+/** Format a deadline as "Fri 3 Apr" */
+export function formatDeadlineShort(weekNum) {
+  const d = getWeekDeadline(weekNum);
+  return `Fri ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+}
+
 /** Given history entries for a team, which fiscal weeks have submissions? */
 export function getSubmittedWeeks(history, teamKey) {
   return new Set(

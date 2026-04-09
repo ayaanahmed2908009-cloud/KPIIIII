@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { canSeeAll } from '../auth/users';
 import { AIConfidenceBriefing } from '../components/charts/AIConfidenceBriefing';
 import { FollowerGrowthChart, EngagementGaugeChart, ContentMixChart, PressFunnelChart, MomentumCard } from '../components/charts/MarketingCharts';
-import { FundraisingThermometer, PartnerPipelineKanban, WeeklyFundsChart, ConversionRateChart, DealHealthCard } from '../components/charts/SponsorshipCharts';
 import { HeadcountChart, OKRHeatmapChart, RetentionDonutChart, SatisfactionChart, SelfVsAIChart } from '../components/charts/GeneralMgmtCharts';
 import { ArticlePipelineChart, PublicationPaceChart, ReportQualityChart, AnnualReportProgress, ExternalReachChart, ResearchPartnershipChart } from '../components/charts/ImpactLabsCharts';
 import { EventCalendarHeatmap, AttendeeTrackerChart, SatisfactionDotPlot, RepeatAttendeeGauge, SponsorVolunteerChart } from '../components/charts/EventsCharts';
@@ -19,19 +18,6 @@ const TEAM_CONFIG = [
       <ContentMixChart key="3" history={history} />,
       <PressFunnelChart key="4" history={history} />,
       <MomentumCard key="5" history={history} />,
-    ],
-  },
-  {
-    key: 'sponsorships',
-    label: 'Sponsorships & Fundraising',
-    color: '#10B981',
-    icon: '🤝',
-    charts: (history, analysisHistory) => [
-      <FundraisingThermometer key="1" history={history} />,
-      <PartnerPipelineKanban key="2" history={history} />,
-      <WeeklyFundsChart key="3" history={history} />,
-      <ConversionRateChart key="4" history={history} />,
-      <DealHealthCard key="5" history={history} />,
     ],
   },
   {
@@ -135,7 +121,7 @@ export default function Analytics({ currentUser, history, analysisHistory }) {
         </h1>
         <p style={{ fontSize: '13px', color: '#475569', margin: 0 }}>
           {isCeo
-            ? 'Organisation-wide performance overview across all 5 teams — live charts powered by weekly inputs'
+            ? 'Organisation-wide performance overview across all 4 teams — live charts powered by weekly inputs'
             : isGM
             ? 'General Management performance dashboard — submit weekly data to unlock live charts'
             : `${visibleTeams[0]?.label} performance dashboard`}

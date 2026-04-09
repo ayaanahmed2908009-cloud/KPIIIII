@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Navigation from './components/Navigation';
 import Dashboard from './pages/Dashboard';
 import RiskHeatmap from './pages/RiskHeatmap';
@@ -7,9 +7,9 @@ import Analytics from './pages/Analytics';
 import Login from './pages/Login';
 import AnalysisReport from './pages/AnalysisReport';
 import ProbabilityEngine from './pages/ProbabilityEngine';
-import { loadHistory, saveHistory, loadAnalysisHistory, saveAnalysisHistory } from './utils/storage';
-import { getCurrentWeekNumber, getCurrentFYWeek, dateToFYWeek } from './utils/analysisHelpers';
-import { loadSession, clearSession, canRunAnalysis, canSeeAll } from './auth/users';
+import { loadHistory, saveEntry, loadAnalysisHistory, saveAnalysis } from './utils/storage';
+import { getCurrentFYWeek } from './utils/analysisHelpers';
+import { loadSession, clearSession, canRunAnalysis } from './auth/users';
 
 function getDefaultPage(user) {
   if (!user) return 'dashboard';
@@ -17,27 +17,33 @@ function getDefaultPage(user) {
   return 'dashboard';
 }
 
-function initHistory() {
-  const saved = loadHistory();
-  // Strip any leftover trial/seed entries (isTrial flag) — trial period is over
-  const real = saved.filter(e => !e.isTrial);
-  if (real.length !== saved.length) {
-    saveHistory(real);
-  }
-  return real;
-}
-
 export default function App() {
   const [currentUser, setCurrentUser] = useState(() => loadSession());
   const [currentPage, setCurrentPage] = useState(() => getDefaultPage(loadSession()));
-  const [history, setHistory] = useState(() => initHistory());
-  const [analysisHistory, setAnalysisHistory] = useState(() => loadAnalysisHistory());
+  const [history, setHistory] = useState([]);
+  const [analysisHistory, setAnalysisHistory] = useState([]);
+  const [dataLoading, setDataLoading] = useState(true);
   const [isAnalysing, setIsAnalysing] = useState(false);
   const [analysisError, setAnalysisError] = useState(null);
-  const [reportEntry, setReportEntry] = useState(null); // triggers briefing overlay
+  const [reportEntry, setReportEntry] = useState(null);
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('solarpak_api_key') || '');
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [keyDraft, setKeyDraft] = useState('');
+
+  // ── Load data from server on mount ─────────────────────────────────────────
+  useEffect(() => {
+    Promise.all([loadHistory(), loadAnalysisHistory()])
+      .then(([hist, analyses]) => {
+        // Strip any leftover trial/seed entries
+        setHistory(hist.filter(e => !e.isTrial));
+        setAnalysisHistory(analyses);
+      })
+      .catch(() => {
+        setHistory([]);
+        setAnalysisHistory([]);
+      })
+      .finally(() => setDataLoading(false));
+  }, []);
 
   const handleLogin = (user) => {
     setCurrentUser(user);
@@ -50,8 +56,7 @@ export default function App() {
     setCurrentPage('dashboard');
   };
 
-  const handleAddEntry = useCallback((weekNumber, team, inputs) => {
-    // Always tag the entry with the real FY week number derived from today's date
+  const handleAddEntry = useCallback(async (weekNumber, team, inputs) => {
     const fyWeek = getCurrentFYWeek();
     const entry = {
       weekNumber: fyWeek,
@@ -59,13 +64,13 @@ export default function App() {
       dateSubmitted: new Date().toISOString(),
       inputs
     };
+    // Optimistic update so the UI responds instantly
     setHistory(prev => {
-      // Replace any existing entry for the same team + week (prevents duplicates)
       const filtered = prev.filter(e => !(e.team === team && e.weekNumber === fyWeek));
-      const next = [...filtered, entry];
-      saveHistory(next);
-      return next;
+      return [...filtered, entry];
     });
+    // Persist to server
+    await saveEntry(entry);
   }, []);
 
   const handleRunAnalysis = useCallback(async () => {
@@ -74,7 +79,6 @@ export default function App() {
     setAnalysisError(null);
 
     try {
-      // Always use the real FY week so Claude knows exactly where we are in the year
       const weekNumber = getCurrentFYWeek();
       const storedKey = localStorage.getItem('solarpak_api_key') || '';
       const response = await fetch('/api/analyze', {
@@ -92,13 +96,9 @@ export default function App() {
         analysis: data.analysis
       };
 
-      setAnalysisHistory(prev => {
-        const next = [...prev, entry];
-        saveAnalysisHistory(next);
-        return next;
-      });
-
-      // Show the full briefing report immediately
+      // Persist to server then update state
+      await saveAnalysis(entry);
+      setAnalysisHistory(prev => [...prev, entry]);
       setReportEntry(entry);
     } catch (err) {
       setAnalysisError(err.message);
@@ -108,7 +108,30 @@ export default function App() {
     }
   }, [history]);
 
-  // Not logged in → show login screen
+  // ── Loading screen while data fetches from server ───────────────────────────
+  if (dataLoading) {
+    return (
+      <div style={{
+        minHeight: '100vh', background: '#0f172a',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontFamily: 'Inter, system-ui, sans-serif'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '48px', height: '48px', borderRadius: '12px',
+            background: 'linear-gradient(135deg, #F59E0B, #EF4444)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 16px'
+          }}>
+            <span style={{ fontSize: '22px', fontWeight: '800', color: '#fff' }}>SP</span>
+          </div>
+          <div style={{ fontSize: '14px', color: '#475569' }}>Loading…</div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Not logged in ───────────────────────────────────────────────────────────
   if (!currentUser) {
     return <Login onLogin={handleLogin} />;
   }
