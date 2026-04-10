@@ -79,6 +79,16 @@ app.delete('/api/history', (req, res) => {
   res.json({ success: true });
 });
 
+// DELETE /api/history/week/:weekNumber — clear all entries for a specific week
+app.delete('/api/history/week/:weekNumber', (req, res) => {
+  const weekNum = parseInt(req.params.weekNumber, 10);
+  if (isNaN(weekNum)) return res.status(400).json({ error: 'Invalid week number' });
+  const data = readData();
+  data.history = data.history.filter(e => e.weekNumber !== weekNum);
+  writeData(data);
+  res.json({ success: true });
+});
+
 // GET /api/analysis — return all analysis history entries
 app.get('/api/analysis', (req, res) => {
   const data = readData();

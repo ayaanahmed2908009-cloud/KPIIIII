@@ -4,7 +4,7 @@ import {
   getLeadershipWarnings, getExecutiveScore, scoreColor,
   riskColor, riskBg, formatDate, getCurrentWeekNumber, getConsecutiveBelowWeeks
 } from '../utils/analysisHelpers';
-import { exportHistory, clearAll } from '../utils/storage';
+import { exportHistory, clearWeek } from '../utils/storage';
 import { getVisibleTeams, canSeeAll } from '../auth/users';
 import WeekTimeline from '../components/WeekTimeline';
 import { getCurrentFiscalWeek, getWeekShortLabel, FISCAL_START, formatDeadlineShort } from '../utils/fiscalYear';
@@ -371,12 +371,13 @@ function WeeklyInputForm({ teamKey, onChange }) {
 }
 
 // ─── Own-team section (for team leads and GM's own-inputs tab) ─────────────────
-function OwnTeamSection({ teamKey, teamInputs, onInputChange, onSubmitTeam, latestAnalysis, analysisHistory, lastSubmission }) {
+function OwnTeamSection({ teamKey, teamInputs, onInputChange, onSubmitTeam, latestAnalysis, analysisHistory, lastSubmission, effectiveWeek, history }) {
   const [collapsed, setCollapsed] = useState(false);
   const [formTab, setFormTab] = useState('form');
   const [submitKey, setSubmitKey] = useState(0);
   const color = TEAM_COLORS[teamKey];
   const label = TEAM_LABELS[teamKey];
+  const alreadySubmitted = (history || []).some(e => e.team === teamKey && e.weekNumber === effectiveWeek);
   const teamAnalysis = latestAnalysis?.[teamKey];
   const overallProb = teamAnalysis?.overallProbability;
   const consecutiveBelow = getConsecutiveBelowWeeks(analysisHistory, teamKey);
@@ -415,15 +416,25 @@ function OwnTeamSection({ teamKey, teamInputs, onInputChange, onSubmitTeam, late
             ))}
           </div>
           {formTab === 'form' && (
-            <>
-              <WeeklyInputForm key={submitKey} teamKey={teamKey} onChange={(key, val) => onInputChange(teamKey, key, val)} />
-              <button
-                onClick={() => { onSubmitTeam(teamKey); setSubmitKey(k => k + 1); }}
-                style={{ marginTop: '16px', padding: '10px 24px', borderRadius: '8px', border: 'none', background: color, color: '#fff', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
-                onMouseEnter={e => e.target.style.opacity = '0.85'}
-                onMouseLeave={e => e.target.style.opacity = '1'}
-              >Submit {label} Data</button>
-            </>
+            alreadySubmitted ? (
+              <div style={{ background: '#0f2a1a', border: '1px solid #16a34a40', borderLeft: '4px solid #16a34a', borderRadius: '8px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '20px' }}>✅</span>
+                <div>
+                  <div style={{ color: '#4ade80', fontWeight: '700', fontSize: '14px' }}>Week {effectiveWeek} already submitted</div>
+                  <div style={{ color: '#64748b', fontSize: '13px', marginTop: '2px' }}>Your data for this week has been recorded. You can only submit once per week.</div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <WeeklyInputForm key={submitKey} teamKey={teamKey} onChange={(key, val) => onInputChange(teamKey, key, val)} />
+                <button
+                  onClick={() => { onSubmitTeam(teamKey); setSubmitKey(k => k + 1); }}
+                  style={{ marginTop: '16px', padding: '10px 24px', borderRadius: '8px', border: 'none', background: color, color: '#fff', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+                  onMouseEnter={e => e.target.style.opacity = '0.85'}
+                  onMouseLeave={e => e.target.style.opacity = '1'}
+                >Submit {label} Data</button>
+              </>
+            )
           )}
           {formTab === 'analysis' && (
             teamAnalysis
@@ -457,6 +468,10 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
 
   // GM tab state
   const [gmTab, setGmTab] = useState('myInputs'); // 'myInputs' | 'teamOverview'
+
+  // CEO week reset state
+  const submittedWeeks = [...new Set(history.map(e => e.weekNumber))].sort((a, b) => a - b);
+  const [resetWeek, setResetWeek] = useState('');
 
   const [inputs, setInputs] = useState(() => {
     const init = {};
@@ -505,10 +520,28 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
             background: 'transparent', color: '#94a3b8', fontSize: '13px',
             cursor: history.length === 0 ? 'not-allowed' : 'pointer', fontFamily: 'inherit'
           }}>↓ Export JSON</button>
-          <button onClick={async () => { if (window.confirm('Clear all history and analysis? This cannot be undone.')) { await clearAll(); window.location.reload(); } }} style={{
-            padding: '10px 16px', borderRadius: '8px', border: '1px solid #7f1d1d',
-            background: 'transparent', color: '#ef4444', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit'
-          }}>Reset All</button>
+          {/* Reset a specific week's submissions */}
+          <select value={resetWeek} onChange={e => setResetWeek(e.target.value)} style={{
+            background: '#1e293b', border: '1px solid #334155', borderRadius: '6px',
+            padding: '8px 10px', color: resetWeek ? '#f1f5f9' : '#475569', fontSize: '13px', fontFamily: 'inherit', cursor: 'pointer'
+          }}>
+            <option value="">Reset week…</option>
+            {submittedWeeks.map(w => <option key={w} value={w}>Week {w}</option>)}
+          </select>
+          <button
+            disabled={!resetWeek}
+            onClick={async () => {
+              if (window.confirm(`Reset all submissions for Week ${resetWeek}? This cannot be undone.`)) {
+                await clearWeek(parseInt(resetWeek));
+                setResetWeek('');
+                window.location.reload();
+              }
+            }}
+            style={{
+              padding: '10px 16px', borderRadius: '8px', border: '1px solid #7f1d1d',
+              background: 'transparent', color: resetWeek ? '#ef4444' : '#4a1111', fontSize: '13px',
+              cursor: resetWeek ? 'pointer' : 'not-allowed', fontFamily: 'inherit'
+            }}>🗑 Reset Week</button>
         </div>
 
         <WeekTimeline history={history} currentUser={currentUser} />
@@ -540,10 +573,6 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
             background: 'transparent', color: '#94a3b8', fontSize: '13px',
             cursor: history.length === 0 ? 'not-allowed' : 'pointer', fontFamily: 'inherit'
           }}>↓ Export JSON</button>
-          <button onClick={async () => { if (window.confirm('Clear all history and analysis? This cannot be undone.')) { await clearAll(); window.location.reload(); } }} style={{
-            padding: '10px 16px', borderRadius: '8px', border: '1px solid #7f1d1d',
-            background: 'transparent', color: '#ef4444', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit'
-          }}>Reset All</button>
         </div>
 
         {/* GM Tab Switcher */}
@@ -592,6 +621,8 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
               latestAnalysis={latestAnalysis}
               analysisHistory={analysisHistory}
               lastSubmission={lastSubmissionPerTeam.generalManagement}
+              effectiveWeek={effectiveWeek}
+              history={history}
             />
           </div>
         )}
@@ -655,6 +686,8 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
           latestAnalysis={latestAnalysis}
           analysisHistory={analysisHistory}
           lastSubmission={lastSubmissionPerTeam[teamKey]}
+          effectiveWeek={effectiveWeek}
+          history={history}
         />
       ))}
     </div>

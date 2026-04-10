@@ -48,6 +48,14 @@ export async function saveAnalysis(entry) {
   }
 }
 
+export async function clearWeek(weekNumber) {
+  try {
+    await fetch(`/api/history/week/${weekNumber}`, { method: 'DELETE' });
+  } catch (err) {
+    console.error('[storage] Failed to clear week:', err);
+  }
+}
+
 export async function clearAll() {
   try {
     await Promise.all([
