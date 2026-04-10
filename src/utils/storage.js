@@ -56,6 +56,14 @@ export async function clearWeek(weekNumber) {
   }
 }
 
+export async function clearTeam(teamKey) {
+  try {
+    await fetch(`/api/history/team/${teamKey}`, { method: 'DELETE' });
+  } catch (err) {
+    console.error('[storage] Failed to clear team:', err);
+  }
+}
+
 export async function clearAll() {
   try {
     await Promise.all([

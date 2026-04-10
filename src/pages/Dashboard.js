@@ -4,7 +4,7 @@ import {
   getLeadershipWarnings, getExecutiveScore, scoreColor,
   riskColor, riskBg, formatDate, getCurrentWeekNumber, getConsecutiveBelowWeeks
 } from '../utils/analysisHelpers';
-import { exportHistory, clearWeek } from '../utils/storage';
+import { exportHistory, clearWeek, clearTeam } from '../utils/storage';
 import { getVisibleTeams, canSeeAll } from '../auth/users';
 import WeekTimeline from '../components/WeekTimeline';
 import { getCurrentFiscalWeek, getWeekShortLabel, FISCAL_START, formatDeadlineShort } from '../utils/fiscalYear';
@@ -469,9 +469,11 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
   // GM tab state
   const [gmTab, setGmTab] = useState('myInputs'); // 'myInputs' | 'teamOverview'
 
-  // CEO week reset state
+  // CEO reset state
   const submittedWeeks = [...new Set(history.map(e => e.weekNumber))].sort((a, b) => a - b);
+  const submittedTeams = [...new Set(history.map(e => e.team))];
   const [resetWeek, setResetWeek] = useState('');
+  const [resetTeam, setResetTeam] = useState('');
 
   const [inputs, setInputs] = useState(() => {
     const init = {};
@@ -542,6 +544,27 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
               background: 'transparent', color: resetWeek ? '#ef4444' : '#4a1111', fontSize: '13px',
               cursor: resetWeek ? 'pointer' : 'not-allowed', fontFamily: 'inherit'
             }}>🗑 Reset Week</button>
+          <select value={resetTeam} onChange={e => setResetTeam(e.target.value)} style={{
+            background: '#1e293b', border: '1px solid #334155', borderRadius: '6px',
+            padding: '8px 10px', color: resetTeam ? '#f1f5f9' : '#475569', fontSize: '13px', fontFamily: 'inherit', cursor: 'pointer'
+          }}>
+            <option value="">Reset team…</option>
+            {submittedTeams.map(t => <option key={t} value={t}>{TEAM_LABELS[t]}</option>)}
+          </select>
+          <button
+            disabled={!resetTeam}
+            onClick={async () => {
+              if (window.confirm(`Reset all submissions for ${TEAM_LABELS[resetTeam]}? This cannot be undone.`)) {
+                await clearTeam(resetTeam);
+                setResetTeam('');
+                window.location.reload();
+              }
+            }}
+            style={{
+              padding: '10px 16px', borderRadius: '8px', border: '1px solid #7f1d1d',
+              background: 'transparent', color: resetTeam ? '#ef4444' : '#4a1111', fontSize: '13px',
+              cursor: resetTeam ? 'pointer' : 'not-allowed', fontFamily: 'inherit'
+            }}>🗑 Reset Team</button>
         </div>
 
         <WeekTimeline history={history} currentUser={currentUser} />

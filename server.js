@@ -89,6 +89,15 @@ app.delete('/api/history/week/:weekNumber', (req, res) => {
   res.json({ success: true });
 });
 
+// DELETE /api/history/team/:teamKey — clear all entries for a specific team
+app.delete('/api/history/team/:teamKey', (req, res) => {
+  const teamKey = req.params.teamKey;
+  const data = readData();
+  data.history = data.history.filter(e => e.team !== teamKey);
+  writeData(data);
+  res.json({ success: true });
+});
+
 // GET /api/analysis — return all analysis history entries
 app.get('/api/analysis', (req, res) => {
   const data = readData();
