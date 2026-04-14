@@ -137,7 +137,7 @@ const YEAR1_TARGETS = {
     totalFollowers: 3000,
     engagementRate: '2-4%',
     postsPerMonth: 12,
-    postVideoRatio: '2:1',
+    postVideoRatio: '1:2',
     pressMentions: 4
   },
   generalManagement: {
@@ -149,6 +149,7 @@ const YEAR1_TARGETS = {
   },
   impactLabs: {
     annualReportPublished: 1,
+    annualReportDeadline: '20 May 2026 (FY Week 8) — HARD DEADLINE, not end of year',
     articlesPublished: 8,
     dataAccuracyAuditScore: '85%',
     reportQualityAIScore: '>85',
@@ -156,11 +157,10 @@ const YEAR1_TARGETS = {
   },
   events: {
     eventsOrganised: 3,
+    eventPipelineHealth: 'consistent weekly planning progress (planning % rising week-on-week, milestones being confirmed)',
+    weeklyEngagementActivity: '>=5 planning hours/week average, >=3 outreach contacts/week average',
     totalAttendees: 300,
-    avgAttendeesPerEvent: 100,
-    postEventSatisfaction: '4.0/5',
-    repeatAttendeeRate: '15%',
-    eventsWithSponsor: 1
+    postEventQuality: 'satisfaction >=4.0/5, repeat attendee rate >=15%, post-event follow-through >=80%'
   }
 };
 
@@ -225,6 +225,32 @@ PROBABILITY CALIBRATION BY YEAR STAGE — BE GENEROUS, ESPECIALLY EARLY:
 - Missing team data this week: use last known inputs, do not penalise, flag low_confidence = true.
 - IMPORTANT: SolarPak is a new nonprofit. Be encouraging but honest. Err on the side of achievable rather than harsh.
 
+IMPACT LABS — ANNUAL REPORT SPECIAL ASSESSMENT RULES:
+The annual impact report has a HARD INTERNAL DEADLINE of 20 May 2026 (FY Week 8) — NOT end of year.
+- Do NOT project the report completion toward end of March 2027. The window closes at Week 8.
+- If the current week is ≤ Week 8: calculate probability based on (100 - annualReportPercentComplete) remaining work vs weeks left until Week 8. If on pace to finish by Week 8, score high (75–90). If behind pace, penalise sharply.
+- If the current week is > Week 8 and the report was not submitted as 100% complete by then: the Annual Impact Report KPI probability should be set very low (15–25) to reflect a missed hard deadline. Do not recover this score — the opportunity has passed.
+- If the current week is > Week 8 and annualReportPercentComplete reached 100 at or before Week 8: set probability to 95.
+- Weeks where annualReportPercentComplete = 0 and the team has NOT previously reported any progress: treat as not-yet-started, not as "entered 0 this week".
+
+EVENTS TEAM — SPECIAL ASSESSMENT RULES (apply these every time you analyse the events team):
+The events team KPI structure was updated mid-year. Older history entries (pre-update) used different field names. Apply these backward-compatibility rules:
+- Old field "eventsHeldThisWeek > 0" is equivalent to new field "eventOccurredThisWeek = 1". Treat them the same way.
+- Old fields "totalEventsYTD" and "totalAttendeesYTD" have the same key names in new entries — use them normally across all history.
+- Old field "attendeeSatisfactionScore" and "repeatAttendeePercentage" have the same key names — use them normally.
+- Old fields "eventsHeldThisWeek", "attendeesThisWeek", "volunteersEngaged", "schoolsReachedYTD" exist only in old entries. Do not penalise their absence in new entries.
+- New fields "nextEventPlanningPercent", "milestonesConfirmedThisWeek", "eventPlanningHoursThisWeek", "outreachContactsMade", "promoMaterialsCreated", "totalConfirmedRegistrations", "postEventActionsPercent" exist only in new entries. Do not penalise their absence in old entries.
+
+EVENT-TRIGGERED KPI SCORING (critical — do not apply standard trend logic here):
+- "Post-Event Quality Score" must ONLY be scored using weeks where eventOccurredThisWeek = 1 (or eventsHeldThisWeek > 0 in old entries).
+- Weeks with no event are NOT zero scores — they are SKIPPED ENTIRELY. A team with 40 non-event weeks and 2 excellent event weeks should score HIGH on post-event quality, not low.
+- If no events have occurred yet, set Post-Event Quality Score probability to 65 (neutral/early — do not penalise).
+
+PIPELINE & EFFORT KPIs (use these to credit ongoing work between events):
+- "Event Pipeline & Planning Health": Score based on whether nextEventPlanningPercent is increasing week-over-week and milestones are being confirmed. Flat or rising = positive. Zero every week = at risk.
+- "Weekly Engagement Activity": Score based on average weekly eventPlanningHoursThisWeek and outreachContactsMade. A team consistently putting in ≥5 hours/week and making ≥3 outreach contacts is on track even if no events have occurred yet.
+- These two KPIs ensure the events team is NEVER penalised simply for being in a non-event period. They reflect real work being done toward future events.
+
 YEAR 1 ANNUAL KPI TARGETS:
 ${targetsStr}
 
@@ -280,11 +306,10 @@ Return ONLY this JSON structure, no preamble, no markdown fences:
     "diagnosis": "<2-3 sentences>",
     "kpis": [
       {"name": "Events Organised", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
+      {"name": "Event Pipeline & Planning Health", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
+      {"name": "Weekly Engagement Activity", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Total Event Attendees", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
-      {"name": "Avg Attendees Per Event", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
-      {"name": "Post-Event Satisfaction", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
-      {"name": "Repeat Attendee Rate", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
-      {"name": "Events with Confirmed Sponsor", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"}
+      {"name": "Post-Event Quality Score", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"}
     ]
   }
 }`;

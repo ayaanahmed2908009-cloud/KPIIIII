@@ -47,10 +47,10 @@ export const KPI_DIRECTORY = {
       {
         id: 'postVideoRatio',
         name: 'Post to Video Ratio',
-        description: 'Ratio of standard posts to video posts, targeting a 2:1 mix in Year 1.',
-        targets: { year1: '2:1', year2: '1:1', year3: '1:2' },
+        description: 'Ratio of standard posts to video posts, targeting a 1:2 mix in Year 1.',
+        targets: { year1: '1:2', year2: '1:1', year3: '2:1' },
         feedingFields: ['Posts published this week', 'Videos published this week'],
-        probabilityCalc: 'Calculates the cumulative YTD ratio of posts to videos and scores probability based on how close the ratio is to 2:1.',
+        probabilityCalc: 'Calculates the cumulative YTD ratio of posts to videos and scores probability based on how close the ratio is to 1:2.',
         frequency: 'Weekly'
       },
       {
@@ -184,46 +184,46 @@ export const KPI_DIRECTORY = {
         name: 'Events Organised Per Year',
         description: 'Total number of events planned and executed by the team during the year.',
         targets: { year1: '3', year2: '7', year3: '15' },
-        feedingFields: ['Events completed YTD', 'Hours spent on event planning this week', 'Is an event live or within 2 weeks'],
-        probabilityCalc: 'Projects events completed YTD toward 3 using the current completion rate, boosted if active planning hours indicate an imminent event.',
+        feedingFields: ['Total events held YTD', 'Weeks until next event', '% complete on planning for next event'],
+        probabilityCalc: 'Projects events completed YTD toward 3; upcoming pipeline (planning % and weeks away) counts as a leading indicator that the next event will complete on time.',
+        frequency: 'Weekly'
+      },
+      {
+        id: 'eventPipelineHealth',
+        name: 'Event Pipeline & Planning Health',
+        description: 'Whether events are being actively and systematically planned — measured independently of whether an event is currently live.',
+        targets: { year1: 'Consistent week-on-week planning progress', year2: 'Consistent week-on-week planning progress', year3: 'Consistent week-on-week planning progress' },
+        feedingFields: ['% complete on planning for next event', 'Key milestones confirmed this week', 'Weeks until next event'],
+        probabilityCalc: 'Averages weekly planning progress and milestone confirmation activity. Rewards steady week-over-week increases in planning %, even in non-event weeks.',
+        frequency: 'Weekly'
+      },
+      {
+        id: 'weeklyEngagementActivity',
+        name: 'Weekly Engagement Activity',
+        description: 'Consistent effort toward events through planning hours, outreach contacts, and promotional work each week — always measurable regardless of whether an event is live.',
+        targets: { year1: '≥5 hrs/wk average · ≥3 outreach contacts/wk', year2: '≥8 hrs/wk · ≥5 contacts/wk', year3: '≥12 hrs/wk · ≥8 contacts/wk' },
+        feedingFields: ['Hours spent on event-related work this week', 'Outreach contacts made this week', 'Promo/marketing pieces published or drafted this week'],
+        probabilityCalc: 'Averages weekly planning hours and outreach contacts across all submitted weeks. Probability rises with consistent non-zero effort even during non-event periods.',
         frequency: 'Weekly'
       },
       {
         id: 'totalAttendees',
         name: 'Total Event Attendees',
-        description: 'Cumulative count of attendees across all events held during the year.',
+        description: 'Cumulative count of attendees across all events held during the year, supplemented by confirmed registrations for upcoming events.',
         targets: { year1: '300', year2: '1,000', year3: '3,000' },
-        feedingFields: ['Total confirmed attendees YTD', 'New registrations confirmed this week'],
-        probabilityCalc: 'Projects total confirmed attendees YTD toward 300 using current registration pace.',
+        feedingFields: ['Total attendees YTD (cumulative)', 'Total confirmed registrations for next event so far'],
+        probabilityCalc: 'Projects total YTD attendees plus confirmed pipeline registrations toward 300. Cumulative metric — only goes up.',
         frequency: 'Weekly'
       },
       {
-        id: 'avgAttendeesPerEvent',
-        name: 'Avg Attendees Per Event',
-        description: 'Average number of attendees across all completed events in the year.',
-        targets: { year1: '100', year2: '140', year3: '200' },
-        feedingFields: ['Total attendees at the closed event (EVENT-TRIGGERED)', 'Events completed YTD'],
-        probabilityCalc: 'Calculates the running average of attendees per completed event and assesses the probability of reaching 100 on average.',
+        id: 'postEventQuality',
+        name: 'Post-Event Quality Score',
+        description: 'Combined quality assessment across event weeks only: attendee satisfaction, repeat attendee rate, and post-event follow-through. Zero-input weeks (no event) are treated as neutral — not penalised.',
+        targets: { year1: 'Satisfaction ≥4.0/5 · Repeat ≥15% · Follow-through ≥80%', year2: 'Satisfaction ≥4.3/5 · Repeat ≥25% · Follow-through ≥85%', year3: 'Satisfaction ≥4.5/5 · Repeat ≥35% · Follow-through ≥90%' },
+        feedingFields: ['Did an event occur this week? (trigger)', 'Post-event satisfaction score (out of 5) (EVENT-TRIGGERED)', 'Repeat attendee percentage (%) (EVENT-TRIGGERED)', '% of post-event actions completed (EVENT-TRIGGERED)'],
+        probabilityCalc: 'Averages satisfaction scores, repeat rates, and follow-through percentages across event weeks ONLY. Weeks with no event are skipped entirely — not scored as zero.',
         frequency: 'Event-triggered'
-      },
-      {
-        id: 'eventSatisfaction',
-        name: 'Post-Event Satisfaction Score',
-        description: 'Average satisfaction score (out of 5) from post-event surveys completed by attendees.',
-        targets: { year1: '4.0/5', year2: '4.3/5', year3: '4.5/5' },
-        feedingFields: ['Post-event satisfaction score for any event that closed this week (EVENT-TRIGGERED)'],
-        probabilityCalc: 'Averages all non-zero event satisfaction scores submitted and estimates the probability of sustaining ≥4.0/5.',
-        frequency: 'Event-triggered'
-      },
-      {
-        id: 'repeatAttendeeRate',
-        name: 'Repeat Attendee Rate',
-        description: 'Percentage of event attendees who have attended a previous SolarPak event.',
-        targets: { year1: '15%', year2: '25%', year3: '35%' },
-        feedingFields: ['Repeat attendees at the closed event (EVENT-TRIGGERED)', 'Total attendees at the closed event (EVENT-TRIGGERED)'],
-        probabilityCalc: 'Calculates the cumulative repeat attendee rate across all completed events and projects toward the 15% annual target.',
-        frequency: 'Event-triggered'
-      },
+      }
     ]
   }
 };
@@ -269,14 +269,19 @@ export const DEFAULT_WEEK_INPUTS = {
     grantProposalsSubmitted: 0
   },
   events: {
-    eventsHeldThisWeek: 0,
+    eventOccurredThisWeek: 0,
     totalEventsYTD: 0,
-    attendeesThisWeek: 0,
+    nextEventPlanningPercent: 0,
+    nextEventWeeksAway: 0,
+    milestonesConfirmedThisWeek: 0,
+    eventPlanningHoursThisWeek: 0,
+    outreachContactsMade: 0,
+    promoMaterialsCreated: 0,
+    totalConfirmedRegistrations: 0,
     totalAttendeesYTD: 0,
     attendeeSatisfactionScore: 0,
     repeatAttendeePercentage: 0,
-    volunteersEngaged: 0,
-    schoolsReachedYTD: 0
+    postEventActionsPercent: 0
   }
 };
 
@@ -319,13 +324,18 @@ export const TEAM_INPUT_FIELDS = {
     { key: 'grantProposalsSubmitted', label: 'Grant proposals submitted YTD (joint)', type: 'integer', note: 'Enter 0 in non-submission weeks; cumulative' }
   ],
   events: [
-    { key: 'eventsHeldThisWeek', label: 'Events held this week', type: 'integer', note: '' },
-    { key: 'totalEventsYTD', label: 'Total events held YTD', type: 'integer', note: 'Current absolute count' },
-    { key: 'attendeesThisWeek', label: 'Attendees at events this week', type: 'integer', note: '' },
-    { key: 'totalAttendeesYTD', label: 'Total attendees YTD', type: 'integer', note: 'Current absolute count' },
-    { key: 'attendeeSatisfactionScore', label: 'Attendee satisfaction score (%)', type: 'decimal', badge: 'EVENT-TRIGGERED', note: 'Enter 0 in non-event weeks' },
+    { key: 'eventOccurredThisWeek', label: 'Did an event occur this week?', type: 'binary', note: '1 = yes, 0 = no — activates event-triggered fields below' },
+    { key: 'totalEventsYTD', label: 'Total events held YTD', type: 'integer', note: 'Cumulative absolute count — only goes up' },
+    { key: 'nextEventPlanningPercent', label: '% complete on planning for next event', type: 'integer', note: '0–100; update weekly to show steady progress' },
+    { key: 'nextEventWeeksAway', label: 'Weeks until next event', type: 'integer', note: 'Pipeline health; enter 0 if no upcoming event planned yet' },
+    { key: 'milestonesConfirmedThisWeek', label: 'Key event milestones confirmed this week', type: 'integer', note: 'e.g. venue, speakers, sponsors, catering, AV' },
+    { key: 'eventPlanningHoursThisWeek', label: 'Hours spent on event-related work this week', type: 'decimal', note: 'Always reflects real effort — never zero when working' },
+    { key: 'outreachContactsMade', label: 'Outreach contacts made this week', type: 'integer', note: 'Sponsors, venues, schools, community partners' },
+    { key: 'promoMaterialsCreated', label: 'Promo/marketing pieces published or drafted this week', type: 'integer', note: '' },
+    { key: 'totalConfirmedRegistrations', label: 'Total confirmed registrations for next event so far', type: 'integer', note: 'Builds up steadily in the lead-up to each event' },
+    { key: 'totalAttendeesYTD', label: 'Total attendees YTD (cumulative)', type: 'integer', note: 'Include this event if one occurred — only goes up' },
+    { key: 'attendeeSatisfactionScore', label: 'Post-event satisfaction score (out of 5)', type: 'decimal', badge: 'EVENT-TRIGGERED', note: 'Enter 0 in non-event weeks' },
     { key: 'repeatAttendeePercentage', label: 'Repeat attendee percentage (%)', type: 'decimal', badge: 'EVENT-TRIGGERED', note: 'Enter 0 in non-event weeks' },
-    { key: 'volunteersEngaged', label: 'Volunteers engaged this week', type: 'integer', note: '' },
-    { key: 'schoolsReachedYTD', label: 'Schools reached YTD', type: 'integer', note: 'Current absolute count' }
+    { key: 'postEventActionsPercent', label: '% of post-event actions completed', type: 'integer', badge: 'EVENT-TRIGGERED', note: 'Follow-ups sent, photos posted, feedback collected; enter 0 in non-event weeks' }
   ]
 };
