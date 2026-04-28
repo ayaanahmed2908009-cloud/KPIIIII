@@ -13,7 +13,7 @@ import { loadSession, clearSession, canRunAnalysis } from './auth/users';
 
 function getDefaultPage(user) {
   if (!user) return 'dashboard';
-  if (user.role === 'ceo' || user.role === 'generalManagement') return 'analytics';
+  if (user.role === 'ceo' || user.role === 'generalManagement' || user.role === 'gm2') return 'analytics';
   return 'dashboard';
 }
 

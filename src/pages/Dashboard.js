@@ -455,9 +455,10 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
   const currentWeekNumber = getCurrentWeekNumber(history);
   const isCeo = currentUser.role === 'ceo';
   const isGM = currentUser.role === 'generalManagement';
-  const isTeamLead = !isCeo && !isGM;
+  const isGM2 = currentUser.role === 'gm2';
+  const isTeamLead = !isCeo && !isGM && !isGM2;
 
-  const execScore = (isCeo || isGM) ? getExecutiveScore(latestAnalysis) : null;
+  const execScore = (isCeo || isGM || isGM2) ? getExecutiveScore(latestAnalysis) : null;
 
   const fiscalWeek = getCurrentFiscalWeek(); // 0 = not started, 1–52 = live week
   const [weekOverride, setWeekOverride] = useState('');
@@ -495,6 +496,29 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
     const entries = history.filter(e => e.team === team);
     lastSubmissionPerTeam[team] = entries.length > 0 ? entries[entries.length - 1].dateSubmitted : null;
   });
+
+  // ── GM2 Read-Only View ──────────────────────────────────────────────────────
+  if (isGM2) {
+    return (
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px' }}>
+        <LeadershipWarnings warnings={warnings} visibleTeams={TEAM_KEYS} />
+        <ExecutiveScoreCard score={execScore} analysisDate={latestAnalysisEntry?.dateRun} weekNumber={latestAnalysisEntry?.weekNumber} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '22px', fontWeight: '800', color: '#f1f5f9' }}>All Teams — Input Overview</div>
+            <div style={{ fontSize: '13px', color: '#475569', marginTop: '2px' }}>Read-only view of submitted weekly data</div>
+          </div>
+          <button onClick={() => exportHistory(history, analysisHistory)} disabled={history.length === 0} style={{
+            padding: '10px 16px', borderRadius: '8px', border: '1px solid #334155',
+            background: 'transparent', color: '#94a3b8', fontSize: '13px',
+            cursor: history.length === 0 ? 'not-allowed' : 'pointer', fontFamily: 'inherit'
+          }}>↓ Export JSON</button>
+        </div>
+        <WeekTimeline history={history} currentUser={currentUser} />
+        <TeamOverview history={history} teamsToShow={TEAM_KEYS} />
+      </div>
+    );
+  }
 
   // ── CEO View ────────────────────────────────────────────────────────────────
   if (isCeo) {

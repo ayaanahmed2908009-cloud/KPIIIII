@@ -37,6 +37,14 @@ export const USERS = [
     role: 'events',
     label: 'Events & Community Outreach',
     team: 'events'
+  },
+  {
+    username: 'gm2',
+    password: 'read',
+    role: 'gm2',
+    label: 'GM2 (Read Only)',
+    team: null,
+    readOnly: true
   }
 ];
 
@@ -46,9 +54,14 @@ export function authenticate(username, password) {
   ) || null;
 }
 
-// Full visibility: CEO and General Management see all teams
+// Full visibility: CEO, General Management, and GM2 (read-only) see all teams
 export function canSeeAll(role) {
-  return role === 'ceo' || role === 'generalManagement';
+  return role === 'ceo' || role === 'generalManagement' || role === 'gm2';
+}
+
+// Read-only accounts cannot submit or modify any data
+export function isReadOnly(role) {
+  return role === 'gm2';
 }
 
 // Only CEO and General Management can trigger AI analysis
