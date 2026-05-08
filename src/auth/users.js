@@ -45,6 +45,13 @@ export const USERS = [
     label: 'GM2 (Read Only)',
     team: null,
     readOnly: true
+  },
+  {
+    username: 'bd',
+    password: 'Vr6Dn2Qx',
+    role: 'businessDevelopment',
+    label: 'Business Development',
+    team: 'businessDevelopment'
   }
 ];
 
@@ -71,8 +78,7 @@ export function canRunAnalysis(role) {
 
 // Returns the array of team keys visible to this role
 export function getVisibleTeams(role) {
-  if (canSeeAll(role)) return ['marketing', 'generalManagement', 'impactLabs', 'events'];
-  // Team lead sees only their own team
+  if (canSeeAll(role)) return ['marketing', 'generalManagement', 'impactLabs', 'events', 'businessDevelopment'];
   return [role];
 }
 

@@ -5,6 +5,7 @@ import { FollowerGrowthChart, EngagementGaugeChart, ContentMixChart, PressFunnel
 import { HeadcountChart, OKRHeatmapChart, RetentionDonutChart, SatisfactionChart, SelfVsAIChart } from '../components/charts/GeneralMgmtCharts';
 import { ArticlePipelineChart, PublicationPaceChart, ReportQualityChart, AnnualReportProgress, ExternalReachChart, ResearchPartnershipChart } from '../components/charts/ImpactLabsCharts';
 import { EventCalendarHeatmap, AttendeeTrackerChart, SatisfactionDotPlot, RepeatAttendeeGauge, SponsorVolunteerChart } from '../components/charts/EventsCharts';
+import { RevenueTrajectoryChart, CustomerAcquisitionChart, CACChart, SatisfactionChannelsChart } from '../components/charts/BusinessDevelopmentCharts';
 
 const TEAM_CONFIG = [
   {
@@ -58,6 +59,18 @@ const TEAM_CONFIG = [
       <SatisfactionDotPlot key="3" history={history} />,
       <RepeatAttendeeGauge key="4" history={history} />,
       <SponsorVolunteerChart key="5" history={history} />,
+    ],
+  },
+  {
+    key: 'businessDevelopment',
+    label: 'Business Development',
+    color: '#14B8A6',
+    icon: '💼',
+    charts: (history, analysisHistory) => [
+      <RevenueTrajectoryChart key="1" history={history} />,
+      <CustomerAcquisitionChart key="2" history={history} />,
+      <CACChart key="3" history={history} />,
+      <SatisfactionChannelsChart key="4" history={history} />,
     ],
   },
 ];
@@ -121,7 +134,7 @@ export default function Analytics({ currentUser, history, analysisHistory }) {
         </h1>
         <p style={{ fontSize: '13px', color: '#475569', margin: 0 }}>
           {isCeo
-            ? 'Organisation-wide performance overview across all 4 teams — live charts powered by weekly inputs'
+            ? 'Organisation-wide performance overview across all 5 teams — live charts powered by weekly inputs'
             : isGM
             ? 'General Management performance dashboard — submit weekly data to unlock live charts'
             : `${visibleTeams[0]?.label} performance dashboard`}

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { TEAM_KEYS, TEAM_LABELS, TEAM_COLORS, TEAM_INPUT_FIELDS, DEFAULT_WEEK_INPUTS } from '../data/kpiData';
 import {
   getLeadershipWarnings, getExecutiveScore, scoreColor,
-  riskColor, riskBg, formatDate, getCurrentWeekNumber, getConsecutiveBelowWeeks
+  riskColor, riskBg, formatDate, getCurrentWeekNumber, getConsecutiveBelowWeeks,
+  computeTeamCommitment, computeYearEndProjections
 } from '../utils/analysisHelpers';
 import { exportHistory, clearWeek, clearTeam } from '../utils/storage';
 import { getVisibleTeams, canSeeAll } from '../auth/users';
@@ -437,12 +438,171 @@ function OwnTeamSection({ teamKey, teamInputs, onInputChange, onSubmitTeam, late
             )
           )}
           {formTab === 'analysis' && (
-            teamAnalysis
-              ? <KPITable kpis={teamAnalysis.kpis} diagnosis={teamAnalysis.diagnosis} lowConfidence={teamAnalysis.low_confidence} />
-              : <div style={{ color: '#475569', fontSize: '14px', padding: '24px', textAlign: 'center' }}>No analysis results yet. Submit data first, then ask General Management or the CEO to run the analysis.</div>
+            teamAnalysis ? (
+              <div>
+                {teamAnalysis.teamAdvice && teamAnalysis.teamAdvice.length > 0 && (
+                  <div style={{ background: '#0f172a', border: `1px solid ${color}30`, borderLeft: `3px solid ${color}`, borderRadius: '8px', padding: '14px 18px', marginBottom: '16px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '700', color, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>AI Advice for your team</div>
+                    <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {teamAnalysis.teamAdvice.map((tip, i) => (
+                        <li key={i} style={{ color: '#cbd5e1', fontSize: '13px', lineHeight: '1.5' }}>{tip}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '8px' }}>Year-End Projections</div>
+                  {computeYearEndProjections(history, effectiveWeek)[teamKey]?.map((item, i) => (
+                    <ProjectionRow key={i} item={item} />
+                  ))}
+                </div>
+                <KPITable kpis={teamAnalysis.kpis} diagnosis={teamAnalysis.diagnosis} lowConfidence={teamAnalysis.low_confidence} />
+              </div>
+            ) : (
+              <div style={{ color: '#475569', fontSize: '14px', padding: '24px', textAlign: 'center' }}>No analysis results yet. Submit data first, then ask General Management or the CEO to run the analysis.</div>
+            )
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Year-End Projections Panel ───────────────────────────────────────────────
+const PROJ_COLORS = { good: '#10B981', risk: '#F59E0B', critical: '#EF4444', neutral: '#475569' };
+
+function ProjectionRow({ item }) {
+  const col = PROJ_COLORS[item.status];
+  const hasProjection = item.projected !== null && item.projected !== undefined;
+  const gap = hasProjection && typeof item.projected === 'number' && typeof item.target === 'number'
+    ? item.projected - item.target : null;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 0', borderBottom: '1px solid #0f172a' }}>
+      <div style={{ flex: '0 0 150px', fontSize: '12px', color: '#94a3b8' }}>{item.label}</div>
+      <div style={{ flex: '0 0 70px', fontSize: '13px', fontWeight: '600', color: '#f1f5f9', textAlign: 'right' }}>
+        {typeof item.current === 'number' ? item.current.toLocaleString() : item.current}
+      </div>
+      {hasProjection && (
+        <>
+          <div style={{ fontSize: '11px', color: '#334155' }}>→</div>
+          <div style={{ flex: '0 0 70px', fontSize: '13px', fontWeight: '700', color: col, textAlign: 'right' }}>
+            {typeof item.projected === 'number' ? item.projected.toLocaleString() : item.projected}
+          </div>
+        </>
+      )}
+      {!hasProjection && <div style={{ flex: '0 0 87px' }} />}
+      <div style={{ flex: '0 0 80px', fontSize: '11px', color: '#475569', textAlign: 'right' }}>
+        target: {typeof item.target === 'number' ? item.target.toLocaleString() : item.target}
+      </div>
+      {gap !== null && (
+        <div style={{ fontSize: '11px', fontWeight: '700', color: col, minWidth: '50px', textAlign: 'right' }}>
+          {gap >= 0 ? `+${gap.toLocaleString()}` : gap.toLocaleString()}
+        </div>
+      )}
+      {item.note && <div style={{ fontSize: '10px', color: '#475569', fontStyle: 'italic' }}>{item.note}</div>}
+    </div>
+  );
+}
+
+function ProjectionTeamCard({ teamKey, rows }) {
+  const color = TEAM_COLORS[teamKey];
+  const label = TEAM_LABELS[teamKey];
+  if (!rows || rows.length === 0) return null;
+  return (
+    <div style={{ background: '#1e293b', borderRadius: '10px', border: `1px solid ${color}20`, borderLeft: `3px solid ${color}`, padding: '14px 16px', flex: '1 1 220px', minWidth: '220px' }}>
+      <div style={{ fontSize: '11px', fontWeight: '700', color, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>
+        {label.split(' ')[0]}
+      </div>
+      {rows.map((item, i) => <ProjectionRow key={i} item={item} />)}
+    </div>
+  );
+}
+
+function YearEndProjectionsPanel({ history, currentFYWeek }) {
+  const proj = computeYearEndProjections(history, currentFYWeek);
+  if (!proj.hasData) return null;
+  return (
+    <div style={{ marginBottom: '28px' }}>
+      <div style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>
+        Year-End Projections — at current pace · {proj.weeksRemaining} weeks remaining
+      </div>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        {TEAM_KEYS.map(key => proj[key]?.length > 0 ? <ProjectionTeamCard key={key} teamKey={key} rows={proj[key]} /> : null)}
+      </div>
+      <div style={{ fontSize: '10px', color: '#334155', marginTop: '8px' }}>
+        Cumulative KPIs projected from average weekly pace · Rate KPIs show current rolling average · Colours: green = on pace, amber = within 25% of target, red = significant gap
+      </div>
+    </div>
+  );
+}
+
+// ─── Commitment Tracker Panel ──────────────────────────────────────────────────
+const TREND_ARROW = { up: '↑', flat: '→', down: '↓', unknown: '—' };
+const TREND_COLOR = { up: '#10B981', flat: '#F59E0B', down: '#EF4444', unknown: '#475569' };
+
+function CommitmentTrackerPanel({ history, analysisHistory, currentFYWeek }) {
+  return (
+    <div style={{ background: '#1e293b', borderRadius: '12px', border: '1px solid #1e293b', marginBottom: '28px', overflow: 'hidden' }}>
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid #0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <span style={{ fontSize: '13px', fontWeight: '700', color: '#f1f5f9' }}>Commitment Tracker</span>
+        <span style={{ fontSize: '11px', color: '#475569' }}>— submission discipline · probability trend · action required</span>
+      </div>
+      <div>
+        {TEAM_KEYS.map((teamKey, idx) => {
+          const ct = computeTeamCommitment(history, analysisHistory, teamKey, currentFYWeek);
+          const tColor = TREND_COLOR[ct.probTrend];
+          const tArrow = TREND_ARROW[ct.probTrend];
+          const isLast = idx === TEAM_KEYS.length - 1;
+          return (
+            <div key={teamKey} style={{
+              display: 'grid',
+              gridTemplateColumns: '180px 100px 80px 1fr',
+              alignItems: 'center',
+              gap: '0',
+              padding: '12px 20px',
+              borderBottom: isLast ? 'none' : '1px solid #0f172a',
+              background: idx % 2 === 1 ? '#192132' : 'transparent'
+            }}>
+              {/* Team name */}
+              <div style={{ fontSize: '13px', fontWeight: '600', color: TEAM_COLORS[teamKey] }}>
+                {TEAM_LABELS[teamKey].split(' ')[0]}
+              </div>
+
+              {/* Submission dots — last 4 weeks */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                {ct.submissionRecord.map(r => (
+                  <div key={r.week} title={`Wk ${r.week}`} style={{
+                    width: '10px', height: '10px', borderRadius: '50%',
+                    background: r.submitted ? '#10B981' : '#1e3a5f',
+                    border: `1px solid ${r.submitted ? '#10B981' : '#334155'}`
+                  }} />
+                ))}
+                <span style={{ fontSize: '10px', color: '#475569', marginLeft: '4px' }}>
+                  {ct.recentHits}/{ct.submissionRecord.length}
+                </span>
+              </div>
+
+              {/* Probability trend */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '16px', fontWeight: '700', color: tColor }}>{tArrow}</span>
+                <span style={{ fontSize: '11px', color: tColor, fontWeight: '600', textTransform: 'capitalize' }}>
+                  {ct.probTrend === 'unknown' ? 'No data' : ct.probTrend}
+                </span>
+              </div>
+
+              {/* Status + action */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{
+                  display: 'inline-block', padding: '2px 9px', borderRadius: '999px',
+                  background: ct.color + '20', color: ct.color,
+                  fontSize: '11px', fontWeight: '700', whiteSpace: 'nowrap', flexShrink: 0
+                }}>{ct.status}</span>
+                <span style={{ fontSize: '12px', color: '#94a3b8', lineHeight: '1.4' }}>{ct.action}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -503,6 +663,8 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px' }}>
         <LeadershipWarnings warnings={warnings} visibleTeams={TEAM_KEYS} />
         <ExecutiveScoreCard score={execScore} analysisDate={latestAnalysisEntry?.dateRun} weekNumber={latestAnalysisEntry?.weekNumber} />
+        <CommitmentTrackerPanel history={history} analysisHistory={analysisHistory} currentFYWeek={fiscalWeek > 0 ? fiscalWeek : effectiveWeek} />
+        <YearEndProjectionsPanel history={history} currentFYWeek={fiscalWeek > 0 ? fiscalWeek : effectiveWeek} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: '22px', fontWeight: '800', color: '#f1f5f9' }}>All Teams — Input Overview</div>
@@ -526,6 +688,8 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px' }}>
         <LeadershipWarnings warnings={warnings} visibleTeams={TEAM_KEYS} />
         <ExecutiveScoreCard score={execScore} analysisDate={latestAnalysisEntry?.dateRun} weekNumber={latestAnalysisEntry?.weekNumber} />
+        <CommitmentTrackerPanel history={history} analysisHistory={analysisHistory} currentFYWeek={fiscalWeek > 0 ? fiscalWeek : effectiveWeek} />
+        <YearEndProjectionsPanel history={history} currentFYWeek={fiscalWeek > 0 ? fiscalWeek : effectiveWeek} />
 
         {/* Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
@@ -603,6 +767,8 @@ export default function Dashboard({ history, analysisHistory, onAddEntry, onRunA
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px' }}>
         <LeadershipWarnings warnings={warnings} visibleTeams={TEAM_KEYS} />
         <ExecutiveScoreCard score={execScore} analysisDate={latestAnalysisEntry?.dateRun} weekNumber={latestAnalysisEntry?.weekNumber} />
+        <CommitmentTrackerPanel history={history} analysisHistory={analysisHistory} currentFYWeek={fiscalWeek > 0 ? fiscalWeek : effectiveWeek} />
+        <YearEndProjectionsPanel history={history} currentFYWeek={fiscalWeek > 0 ? fiscalWeek : effectiveWeek} />
 
         {/* Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>

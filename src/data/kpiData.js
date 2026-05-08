@@ -2,14 +2,16 @@ export const TEAM_COLORS = {
   marketing: '#3B82F6',
   generalManagement: '#8B5CF6',
   impactLabs: '#F59E0B',
-  events: '#EF4444'
+  events: '#EF4444',
+  businessDevelopment: '#14B8A6'
 };
 
 export const TEAM_LABELS = {
   marketing: 'Marketing & Social Media',
   generalManagement: 'General Management',
   impactLabs: 'Impact Labs',
-  events: 'Events & Community Outreach'
+  events: 'Events & Community Outreach',
+  businessDevelopment: 'Business Development'
 };
 
 export const KPI_DIRECTORY = {
@@ -228,7 +230,68 @@ export const KPI_DIRECTORY = {
   }
 };
 
-export const TEAM_KEYS = ['marketing', 'generalManagement', 'impactLabs', 'events'];
+KPI_DIRECTORY.businessDevelopment = {
+  label: 'Business Development',
+  color: '#14B8A6',
+  kpis: [
+    {
+      id: 'annualRevenue',
+      name: 'Annual Revenue',
+      description: 'Total revenue generated through all e-commerce and sales channels during the year.',
+      targets: { year1: '$7,000', year2: '$14,000', year3: '$50,000' },
+      feedingFields: ['Revenue earned this week ($)', 'Total revenue YTD ($)'],
+      probabilityCalc: 'Projects current YTD revenue toward $7,000 using average weekly revenue pace.',
+      frequency: 'Weekly'
+    },
+    {
+      id: 'activeSalesChannels',
+      name: 'Active Sales Channels',
+      description: 'Number of distinct, live channels generating sales (e.g. Shopify, Etsy, Instagram Shop, local market, wholesale account).',
+      targets: { year1: '2', year2: '3–4', year3: '5+' },
+      feedingFields: ['Active sales channels right now'],
+      probabilityCalc: 'Compares current active channel count to the target of 2. Rewards any increase week-over-week.',
+      frequency: 'Weekly'
+    },
+    {
+      id: 'repeatCustomers',
+      name: 'Repeat Customer Base',
+      description: 'Cumulative count of customers who have purchased more than once — the core indicator of product-market fit.',
+      targets: { year1: '10', year2: '40', year3: '150' },
+      feedingFields: ['Total repeat customers to date', 'Repeat orders this week'],
+      probabilityCalc: 'Projects cumulative repeat customers toward 10 using current pace.',
+      frequency: 'Weekly'
+    },
+    {
+      id: 'customerAcquisitionCost',
+      name: 'Customer Acquisition Cost (CAC)',
+      description: 'Average cost to acquire one new customer, calculated from marketing spend divided by new customers. Year 1 goal is to understand and track this — not hit a specific number.',
+      targets: { year1: 'CAC tracked & understood', year2: 'CAC trending down', year3: 'CAC < 20% of LTV' },
+      feedingFields: ['Marketing / acquisition spend this week ($)', 'New customers acquired this week'],
+      probabilityCalc: 'Rewards consistent data entry of both spend and new customer fields. A team tracking CAC every week scores high regardless of the actual number.',
+      frequency: 'Weekly'
+    },
+    {
+      id: 'customerSatisfaction',
+      name: 'Customer Satisfaction Score',
+      description: 'Average rating from customer feedback across all channels. Year 1 target is positive sentiment; Year 2 is above 4/5.',
+      targets: { year1: 'Positive feedback collected', year2: '>4.0 / 5', year3: '>4.5 / 5' },
+      feedingFields: ['Average customer satisfaction score this week (0–5)', 'Number of feedback responses this week'],
+      probabilityCalc: 'Rolling average of submitted satisfaction scores weighted by response count. Weeks with zero responses are skipped.',
+      frequency: 'Weekly (enter 0 if no feedback collected)'
+    },
+    {
+      id: 'distributionPartnerships',
+      name: 'Distribution Partnerships',
+      description: 'Number of signed formal agreements with distributors, retailers, or wholesale partners.',
+      targets: { year1: 'Pipeline established', year2: '1–2 signed', year3: '3–5 signed' },
+      feedingFields: ['Distribution partnerships signed (cumulative)', 'Partnership leads in active conversation'],
+      probabilityCalc: 'Tracks signed partnerships toward the Year 2 target of 1–2. Pipeline count acts as a leading indicator of future conversions.',
+      frequency: 'Weekly'
+    }
+  ]
+};
+
+export const TEAM_KEYS = ['marketing', 'generalManagement', 'impactLabs', 'events', 'businessDevelopment'];
 
 export const DEFAULT_WEEK_INPUTS = {
   marketing: {
@@ -267,6 +330,19 @@ export const DEFAULT_WEEK_INPUTS = {
     coAuthoredPublicationsYTD: 0,
     partnershipPipelineCount: 0,
     grantProposalsSubmitted: 0
+  },
+  businessDevelopment: {
+    revenueThisWeek: 0,
+    totalRevenueYTD: 0,
+    ordersThisWeek: 0,
+    newCustomersThisWeek: 0,
+    repeatCustomersTotal: 0,
+    activeChannels: 0,
+    marketingSpendThisWeek: 0,
+    satisfactionScore: 0,
+    satisfactionResponses: 0,
+    partnershipsSignedTotal: 0,
+    partnershipLeads: 0
   },
   events: {
     eventOccurredThisWeek: 0,
@@ -322,6 +398,19 @@ export const TEAM_INPUT_FIELDS = {
     { key: 'coAuthoredPublicationsYTD', label: 'Co-authored publications YTD', type: 'integer', note: 'Current absolute count — only goes up' },
     { key: 'partnershipPipelineCount', label: 'Institutions in active partnership conversations (no agreement yet)', type: 'integer', note: 'Leading indicator' },
     { key: 'grantProposalsSubmitted', label: 'Grant proposals submitted YTD (joint)', type: 'integer', note: 'Enter 0 in non-submission weeks; cumulative' }
+  ],
+  businessDevelopment: [
+    { key: 'revenueThisWeek', label: 'Revenue earned this week ($)', type: 'decimal', note: 'All channels combined' },
+    { key: 'totalRevenueYTD', label: 'Total revenue YTD ($)', type: 'decimal', note: 'Running cumulative — update every week' },
+    { key: 'ordersThisWeek', label: 'Orders completed this week', type: 'integer', note: '' },
+    { key: 'newCustomersThisWeek', label: 'New customers acquired this week', type: 'integer', note: 'First-time buyers only' },
+    { key: 'repeatCustomersTotal', label: 'Total repeat customers to date', type: 'integer', note: 'Customers who have bought more than once — cumulative' },
+    { key: 'activeChannels', label: 'Active sales channels right now', type: 'integer', note: 'Count only live channels generating sales (Shopify, Etsy, Instagram Shop, markets, etc.)' },
+    { key: 'marketingSpendThisWeek', label: 'Marketing / acquisition spend this week ($)', type: 'decimal', note: 'Ads, promos, samples, market fees — used to calculate CAC' },
+    { key: 'satisfactionScore', label: 'Average customer satisfaction score this week (0–5)', type: 'decimal', note: 'Enter 0 if no feedback collected this week' },
+    { key: 'satisfactionResponses', label: 'Number of customer feedback responses this week', type: 'integer', note: 'Enter 0 if no feedback' },
+    { key: 'partnershipsSignedTotal', label: 'Distribution partnerships signed (cumulative)', type: 'integer', note: 'Formal agreements only — only goes up' },
+    { key: 'partnershipLeads', label: 'Distribution partnership leads in active conversation', type: 'integer', note: 'Retailers, distributors, wholesalers you are actively pitching' }
   ],
   events: [
     { key: 'eventOccurredThisWeek', label: 'Did an event occur this week?', type: 'binary', note: '1 = yes, 0 = no — activates event-triggered fields below' },

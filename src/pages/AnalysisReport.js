@@ -133,6 +133,23 @@ function TeamReport({ teamKey, teamData, warnings }) {
             </div>
           )}
 
+          {/* Team advice */}
+          {teamData?.teamAdvice?.length > 0 && (
+            <div style={{
+              background: '#0c1a2e', border: `1px solid ${color}25`, borderLeft: `3px solid ${color}`,
+              borderRadius: '0 8px 8px 0', padding: '14px 18px', marginBottom: '20px'
+            }}>
+              <div style={{ fontSize: '11px', fontWeight: '600', color, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>
+                AI Advice for team lead
+              </div>
+              <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                {teamData.teamAdvice.map((tip, i) => (
+                  <li key={i} style={{ color: '#cbd5e1', fontSize: '13px', lineHeight: '1.5' }}>{tip}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* KPI table */}
           {teamData?.kpis?.length > 0 && (
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>

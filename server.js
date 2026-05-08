@@ -155,6 +155,14 @@ const YEAR1_TARGETS = {
     reportQualityAIScore: '>85',
     externalCitations: 2
   },
+  businessDevelopment: {
+    annualRevenue: '$7,000 USD',
+    activeSalesChannels: 2,
+    repeatCustomers: 10,
+    customerAcquisitionCost: 'CAC tracked and understood (no specific number target — consistency of tracking is the goal)',
+    customerSatisfaction: 'Positive customer feedback collected — rolling average > 3.5/5',
+    distributionPartnerships: 'Pipeline established — at least 2 active leads by year end'
+  },
   events: {
     eventsOrganised: 3,
     eventPipelineHealth: 'consistent weekly planning progress (planning % rising week-on-week, milestones being confirmed)',
@@ -261,6 +269,22 @@ For each KPI across all four teams, calculate the probability (0–100%) that th
 
 If fewer than 4 weeks of real FY data exist (week number ≥ 1), set low_confidence to true.
 
+BUSINESS DEVELOPMENT TEAM — SPECIAL ASSESSMENT RULES:
+This team uses e-commerce to generate revenue (Shopify, Etsy, Instagram Shop, local markets, wholesale, etc.).
+- Revenue is cumulative — project totalRevenueYTD forward using average weekly revenueThisWeek pace.
+- CAC KPI: score is based on TRACKING CONSISTENCY, not the actual CAC value. If both marketingSpendThisWeek and newCustomersThisWeek are submitted (non-zero) in most weeks, score high (75–90). If one or both are missing regularly, score low. CAC = marketingSpendThisWeek / newCustomersThisWeek — compute and mention it.
+- Repeat customers: cumulative metric — repeatCustomersTotal only goes up. Project toward 10.
+- Customer satisfaction: skip weeks where satisfactionResponses = 0. Only average weeks with real feedback. A team with 3 good feedback weeks is scored well even if many weeks have no responses.
+- Distribution partnerships: partnershipsSignedTotal is cumulative. partnershipLeads is a leading indicator. For Year 1, a pipeline of 2+ active leads counts as on track even with 0 signed.
+- Active channels: reward increases. 0 channels = critical. 1 = at risk. 2+ = on track.
+
+TEAM ADVICE RULES (for teamAdvice field):
+- Write 3–5 bullet points addressed directly to the team lead ("you", "your team").
+- Each point must reference actual numbers from their data — no generic advice.
+- Focus on the highest-leverage action they can take in the next 1–2 weeks.
+- Be direct and specific: e.g. "Your follower growth averages 8/week — you need 35/week to hit 3,000. Prioritise video output and cross-posting."
+- Keep each bullet under 35 words.
+
 Return ONLY this JSON structure, no preamble, no markdown fences:
 
 {
@@ -268,6 +292,7 @@ Return ONLY this JSON structure, no preamble, no markdown fences:
     "overallProbability": <integer 0-100>,
     "low_confidence": <boolean>,
     "diagnosis": "<2-3 sentences: overall trajectory, what drags probability down, one specific action to improve>",
+    "teamAdvice": ["<action #1 with real numbers>", "<action #2>", "<action #3>"],
     "kpis": [
       {"name": "Total Social Following", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Avg Engagement Rate", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
@@ -280,6 +305,7 @@ Return ONLY this JSON structure, no preamble, no markdown fences:
     "overallProbability": <integer 0-100>,
     "low_confidence": <boolean>,
     "diagnosis": "<2-3 sentences>",
+    "teamAdvice": ["<action #1 with real numbers>", "<action #2>", "<action #3>"],
     "kpis": [
       {"name": "Active Team Members", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Member Retention Rate", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
@@ -292,6 +318,7 @@ Return ONLY this JSON structure, no preamble, no markdown fences:
     "overallProbability": <integer 0-100>,
     "low_confidence": <boolean>,
     "diagnosis": "<2-3 sentences>",
+    "teamAdvice": ["<action #1 with real numbers>", "<action #2>", "<action #3>"],
     "kpis": [
       {"name": "Annual Impact Report", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Research Articles Published", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
@@ -304,12 +331,27 @@ Return ONLY this JSON structure, no preamble, no markdown fences:
     "overallProbability": <integer 0-100>,
     "low_confidence": <boolean>,
     "diagnosis": "<2-3 sentences>",
+    "teamAdvice": ["<action #1 with real numbers>", "<action #2>", "<action #3>"],
     "kpis": [
       {"name": "Events Organised", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Event Pipeline & Planning Health", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Weekly Engagement Activity", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Total Event Attendees", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Post-Event Quality Score", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"}
+    ]
+  },
+  "businessDevelopment": {
+    "overallProbability": <integer 0-100>,
+    "low_confidence": <boolean>,
+    "diagnosis": "<2-3 sentences: revenue trajectory, biggest gap vs target, one action>",
+    "teamAdvice": ["<action #1 with real numbers — e.g. revenue pace, CAC figure, repeat customer gap>", "<action #2>", "<action #3>"],
+    "kpis": [
+      {"name": "Annual Revenue", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence including projected year-end figure>"},
+      {"name": "Active Sales Channels", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
+      {"name": "Repeat Customer Base", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence including current count vs target 10>"},
+      {"name": "Customer Acquisition Cost", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence — mention actual CAC if calculable, and tracking consistency>"},
+      {"name": "Customer Satisfaction", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence — mention average score if data exists>"},
+      {"name": "Distribution Partnerships", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence — mention signed count and pipeline>"}
     ]
   }
 }`;
@@ -332,7 +374,7 @@ app.post('/api/analyze', async (req, res) => {
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 6000,
+      max_tokens: 8000,
       system: 'You are a KPI performance analyst. Return only valid JSON with no preamble, no markdown fences, and no extra text. Analyse ALL weeks of history to identify trends before calculating probabilities. Keep each rationale under 25 words and each diagnosis under 50 words.',
       messages: [{ role: 'user', content: buildPrompt(weekNumber, history) }]
     });
