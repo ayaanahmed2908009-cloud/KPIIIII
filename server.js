@@ -138,14 +138,16 @@ const YEAR1_TARGETS = {
     engagementRate: '2-4%',
     postsPerMonth: 12,
     postVideoRatio: '1:2',
-    pressMentions: 4
+    pressMentions: 4,
+    weeklyMeetings: '2 meetings/week at fixed scheduled times · next steps confirmed · 1+ team-lead idea/week'
   },
   generalManagement: {
     activeMembers: 22,
     retentionRate: '80%',
     okrCompletionRate: '70%',
     probabilityAchievementScore: '>70%',
-    workerSatisfaction: '>=90%'
+    workerSatisfaction: '>=90%',
+    weeklyMeetings: '2 meetings/week at fixed scheduled times · next steps confirmed · 1+ team-lead idea/week'
   },
   impactLabs: {
     annualReportPublished: 1,
@@ -153,7 +155,8 @@ const YEAR1_TARGETS = {
     articlesPublished: 8,
     dataAccuracyAuditScore: '85%',
     reportQualityAIScore: '>85',
-    externalCitations: 2
+    externalCitations: 2,
+    weeklyMeetings: '2 meetings/week at fixed scheduled times · next steps confirmed · 1+ team-lead idea/week'
   },
   businessDevelopment: {
     annualRevenue: '$7,000 USD',
@@ -168,7 +171,8 @@ const YEAR1_TARGETS = {
     eventPipelineHealth: 'consistent weekly planning progress (planning % rising week-on-week, milestones being confirmed)',
     weeklyEngagementActivity: '>=5 planning hours/week average, >=3 outreach contacts/week average',
     totalAttendees: 300,
-    postEventQuality: 'satisfaction >=4.0/5, repeat attendee rate >=15%, post-event follow-through >=80%'
+    postEventQuality: 'satisfaction >=4.0/5, repeat attendee rate >=15%, post-event follow-through >=80%',
+    weeklyMeetings: '2 meetings/week at fixed scheduled times · next steps confirmed · 1+ team-lead idea/week'
   }
 };
 
@@ -316,6 +320,25 @@ DISTRIBUTION PARTNERSHIPS (distributionPartnerships KPI):
 - Any signed partnership boosts probability by 10–15 points regardless of pipeline count.
 - Always state signed count and active leads count in the rationale.
 
+WEEKLY MEETINGS KPI — applies to marketing, generalManagement, impactLabs, and events ONLY (not businessDevelopment):
+Fields: meetingsHeldThisWeek (0–2), meetingsOnSchedule (binary 1/0), nextStepsConfirmed (binary 1/0), ideasRaisedByTeamLead (integer).
+Target: 2 meetings every week, held at fixed recurring times, with next steps confirmed and at least 1 idea raised by the team lead.
+
+SCORING — use a weighted composite:
+- Meeting frequency (60% weight): average meetingsHeldThisWeek across all submitted weeks.
+  · Average ≥ 1.8: on track (75–90). Average 1.0–1.79: at risk (55–70). Average < 1.0: critical (30–50).
+  · A single missed week is not catastrophic — look at the trend. 3+ consecutive weeks below 2 = penalise heavily.
+- Schedule discipline (20% weight): proportion of weeks where meetingsOnSchedule = 1.
+  · ≥80% of weeks on schedule: add 10–15 points. 50–79%: neutral. <50%: deduct 10 points from composite.
+  · If meetingsOnSchedule has never been entered (always 0): treat as unknown — do not penalise, flag low_confidence.
+- Proactive leadership (20% weight): average ideasRaisedByTeamLead per week.
+  · ≥1 idea/week average: on track (adds 10 points). 0.5–0.9: neutral. 0 for 3+ consecutive weeks: flag explicitly in diagnosis as a leadership concern.
+  · nextStepsConfirmed = 0 consistently: deduct 5 points — meetings without follow-through are not productive.
+
+OVERALL for weeklyMeetings: combine the three components. Never go below 20% (teams can recover) or above 93% (meetings alone do not guarantee outcomes).
+Always mention in the rationale: (a) average meetings/week, (b) on-schedule %, and (c) whether the team lead is bringing ideas.
+If the team lead has never raised an idea (ideasRaisedByTeamLead = 0 every week), flag it explicitly — this is the most important behavioural signal in this KPI.
+
 TEAM ADVICE RULES (for teamAdvice field):
 - Write 3–5 bullet points addressed directly to the team lead ("you", "your team").
 - Each point must reference actual numbers from their data — no generic advice.
@@ -336,7 +359,8 @@ Return ONLY this JSON structure, no preamble, no markdown fences:
       {"name": "Avg Engagement Rate", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Posts Per Month", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Post to Video Ratio", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
-      {"name": "Press Mentions Per Year", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"}
+      {"name": "Press Mentions Per Year", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
+      {"name": "Weekly Team Meetings", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence — state avg meetings/week, on-schedule %, and whether team lead is raising ideas>"}
     ]
   },
   "generalManagement": {
@@ -349,7 +373,8 @@ Return ONLY this JSON structure, no preamble, no markdown fences:
       {"name": "Member Retention Rate", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "OKR Completion Rate", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Probability Achievement Score", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
-      {"name": "Worker Satisfaction", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"}
+      {"name": "Worker Satisfaction", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
+      {"name": "Weekly Team Meetings", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence — state avg meetings/week, on-schedule %, and whether team lead is raising ideas>"}
     ]
   },
   "impactLabs": {
@@ -362,7 +387,8 @@ Return ONLY this JSON structure, no preamble, no markdown fences:
       {"name": "Research Articles Published", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Data Accuracy Audit Score", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Report Quality AI Score", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
-      {"name": "External Citations", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"}
+      {"name": "External Citations", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
+      {"name": "Weekly Team Meetings", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence — state avg meetings/week, on-schedule %, and whether team lead is raising ideas>"}
     ]
   },
   "events": {
@@ -375,7 +401,8 @@ Return ONLY this JSON structure, no preamble, no markdown fences:
       {"name": "Event Pipeline & Planning Health", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Weekly Engagement Activity", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
       {"name": "Total Event Attendees", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
-      {"name": "Post-Event Quality Score", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"}
+      {"name": "Post-Event Quality Score", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence>"},
+      {"name": "Weekly Team Meetings", "probability": <int>, "riskFlag": "<on track|at risk|critical>", "rationale": "<one sentence — state avg meetings/week, on-schedule %, and whether team lead is raising ideas>"}
     ]
   },
   "businessDevelopment": {

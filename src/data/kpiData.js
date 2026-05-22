@@ -63,6 +63,15 @@ export const KPI_DIRECTORY = {
         feedingFields: ['Press mentions confirmed this week', 'Press contacts reached out to this week'],
         probabilityCalc: 'Projects confirmed press mentions YTD toward the annual target of 4, weighted by the outreach pipeline activity.',
         frequency: 'Weekly'
+      },
+      {
+        id: 'weeklyMeetings',
+        name: 'Weekly Team Meetings',
+        description: 'Two structured team meetings held every week at fixed, recurring times. Each session covers progress since the last meeting and concrete next steps. Team leads are expected to proactively surface ideas and proposals — not wait for direction from management.',
+        targets: { year1: '2 meetings/week · fixed schedule · 1+ team-lead idea/week', year2: '2 meetings/week · 100% on schedule · consistent leadership', year3: '2 meetings/week · zero missed · strong proactive leadership culture' },
+        feedingFields: ['Meetings held this week (0–2)', 'Were meetings at their scheduled time?', 'Were next steps confirmed at both meetings?', 'Ideas or proposals raised by team lead this week'],
+        probabilityCalc: 'Scores meeting frequency (60%), schedule discipline (20%), and proactive leadership (20%). Penalises missed meetings and off-schedule sessions. Flags weeks with zero ideas from the team lead.',
+        frequency: 'Weekly'
       }
     ]
   },
@@ -114,6 +123,15 @@ export const KPI_DIRECTORY = {
         feedingFields: ['Worker satisfaction survey % satisfied (QUARTERLY)', 'Number of survey respondents (QUARTERLY)'],
         probabilityCalc: 'Uses the most recent quarterly survey result to estimate probability of maintaining ≥90% satisfaction, with confidence adjusted for respondent count.',
         frequency: 'Quarterly'
+      },
+      {
+        id: 'weeklyMeetings',
+        name: 'Weekly Team Meetings',
+        description: 'Two structured team meetings held every week at fixed, recurring times. Each session covers progress since the last meeting and concrete next steps. Team leads are expected to proactively surface ideas and proposals — not wait for direction from management.',
+        targets: { year1: '2 meetings/week · fixed schedule · 1+ team-lead idea/week', year2: '2 meetings/week · 100% on schedule · consistent leadership', year3: '2 meetings/week · zero missed · strong proactive leadership culture' },
+        feedingFields: ['Meetings held this week (0–2)', 'Were meetings at their scheduled time?', 'Were next steps confirmed at both meetings?', 'Ideas or proposals raised by team lead this week'],
+        probabilityCalc: 'Scores meeting frequency (60%), schedule discipline (20%), and proactive leadership (20%). Penalises missed meetings and off-schedule sessions. Flags weeks with zero ideas from the team lead.',
+        frequency: 'Weekly'
       }
     ]
   },
@@ -174,6 +192,15 @@ export const KPI_DIRECTORY = {
         feedingFields: ['Institutions partnered (cumulative)', 'Joint projects currently active', 'Co-authored publications YTD', 'Partnership pipeline count', 'Grant proposals submitted YTD'],
         probabilityCalc: 'Projects cumulative institutions partnered toward the annual target using current signing pace, boosted by pipeline size as a leading indicator of future conversions.',
         frequency: 'Weekly'
+      },
+      {
+        id: 'weeklyMeetings',
+        name: 'Weekly Team Meetings',
+        description: 'Two structured team meetings held every week at fixed, recurring times. Each session covers progress since the last meeting and concrete next steps. Team leads are expected to proactively surface ideas and proposals — not wait for direction from management.',
+        targets: { year1: '2 meetings/week · fixed schedule · 1+ team-lead idea/week', year2: '2 meetings/week · 100% on schedule · consistent leadership', year3: '2 meetings/week · zero missed · strong proactive leadership culture' },
+        feedingFields: ['Meetings held this week (0–2)', 'Were meetings at their scheduled time?', 'Were next steps confirmed at both meetings?', 'Ideas or proposals raised by team lead this week'],
+        probabilityCalc: 'Scores meeting frequency (60%), schedule discipline (20%), and proactive leadership (20%). Penalises missed meetings and off-schedule sessions. Flags weeks with zero ideas from the team lead.',
+        frequency: 'Weekly'
       }
     ]
   },
@@ -225,6 +252,15 @@ export const KPI_DIRECTORY = {
         feedingFields: ['Did an event occur this week? (trigger)', 'Post-event satisfaction score (out of 5) (EVENT-TRIGGERED)', 'Repeat attendee percentage (%) (EVENT-TRIGGERED)', '% of post-event actions completed (EVENT-TRIGGERED)'],
         probabilityCalc: 'Averages satisfaction scores, repeat rates, and follow-through percentages across event weeks ONLY. Weeks with no event are skipped entirely — not scored as zero.',
         frequency: 'Event-triggered'
+      },
+      {
+        id: 'weeklyMeetings',
+        name: 'Weekly Team Meetings',
+        description: 'Two structured team meetings held every week at fixed, recurring times. Each session covers progress since the last meeting and concrete next steps. Team leads are expected to proactively surface ideas and proposals — not wait for direction from management.',
+        targets: { year1: '2 meetings/week · fixed schedule · 1+ team-lead idea/week', year2: '2 meetings/week · 100% on schedule · consistent leadership', year3: '2 meetings/week · zero missed · strong proactive leadership culture' },
+        feedingFields: ['Meetings held this week (0–2)', 'Were meetings at their scheduled time?', 'Were next steps confirmed at both meetings?', 'Ideas or proposals raised by team lead this week'],
+        probabilityCalc: 'Scores meeting frequency (60%), schedule discipline (20%), and proactive leadership (20%). Penalises missed meetings and off-schedule sessions. Flags weeks with zero ideas from the team lead.',
+        frequency: 'Weekly'
       }
     ]
   }
@@ -301,7 +337,11 @@ export const DEFAULT_WEEK_INPUTS = {
     totalFollowers: 0,
     avgEngagementRate: 0,
     pressContactsReached: 0,
-    pressMentionsConfirmed: 0
+    pressMentionsConfirmed: 0,
+    meetingsHeldThisWeek: 0,
+    meetingsOnSchedule: 0,
+    nextStepsConfirmed: 0,
+    ideasRaisedByTeamLead: 0
   },
   generalManagement: {
     newMembersJoined: 0,
@@ -311,7 +351,11 @@ export const DEFAULT_WEEK_INPUTS = {
     okrTasksDue: 0,
     probabilityAchievementScore: 0,
     workerSatisfactionSurvey: 0,
-    surveyRespondents: 0
+    surveyRespondents: 0,
+    meetingsHeldThisWeek: 0,
+    meetingsOnSchedule: 0,
+    nextStepsConfirmed: 0,
+    ideasRaisedByTeamLead: 0
   },
   impactLabs: {
     articlesResearchStage: 0,
@@ -329,7 +373,11 @@ export const DEFAULT_WEEK_INPUTS = {
     jointProjectsActive: 0,
     coAuthoredPublicationsYTD: 0,
     partnershipPipelineCount: 0,
-    grantProposalsSubmitted: 0
+    grantProposalsSubmitted: 0,
+    meetingsHeldThisWeek: 0,
+    meetingsOnSchedule: 0,
+    nextStepsConfirmed: 0,
+    ideasRaisedByTeamLead: 0
   },
   businessDevelopment: {
     revenueThisWeek: 0,
@@ -358,7 +406,11 @@ export const DEFAULT_WEEK_INPUTS = {
     totalAttendeesYTD: 0,
     attendeeSatisfactionScore: 0,
     repeatAttendeePercentage: 0,
-    postEventActionsPercent: 0
+    postEventActionsPercent: 0,
+    meetingsHeldThisWeek: 0,
+    meetingsOnSchedule: 0,
+    nextStepsConfirmed: 0,
+    ideasRaisedByTeamLead: 0
   }
 };
 
@@ -370,7 +422,11 @@ export const TEAM_INPUT_FIELDS = {
     { key: 'totalFollowers', label: 'Total followers right now', type: 'integer', note: 'Current absolute count' },
     { key: 'avgEngagementRate', label: 'Average engagement rate this week (%)', type: 'decimal', note: 'e.g. 3.2' },
     { key: 'pressContactsReached', label: 'Press contacts reached out to this week', type: 'integer', note: '' },
-    { key: 'pressMentionsConfirmed', label: 'Press mentions confirmed this week', type: 'integer', note: '' }
+    { key: 'pressMentionsConfirmed', label: 'Press mentions confirmed this week', type: 'integer', note: '' },
+    { key: 'meetingsHeldThisWeek', label: 'Team meetings held this week', type: 'integer', note: 'Target is 2 every week — enter 0, 1, or 2' },
+    { key: 'meetingsOnSchedule', label: 'Were meetings held at their regular scheduled time?', type: 'binary', note: '1 = yes (both on time) · 0 = no (missed slot or rescheduled last-minute)' },
+    { key: 'nextStepsConfirmed', label: 'Were next steps confirmed and recorded at both meetings?', type: 'binary', note: '1 = yes · 0 = no' },
+    { key: 'ideasRaisedByTeamLead', label: 'Ideas or proposals raised by team lead this week', type: 'integer', note: 'Count only ideas originating from the team lead — not directives from management' }
   ],
   generalManagement: [
     { key: 'newMembersJoined', label: 'New members joined this week', type: 'integer', note: '' },
@@ -380,7 +436,11 @@ export const TEAM_INPUT_FIELDS = {
     { key: 'okrTasksDue', label: 'Total OKR tasks due this week', type: 'integer', note: '' },
     { key: 'probabilityAchievementScore', label: 'Probability achievement score, self-assessed (%)', type: 'decimal', note: 'AI will cross-check this' },
     { key: 'workerSatisfactionSurvey', label: 'Worker satisfaction survey % satisfied', type: 'decimal', badge: 'QUARTERLY', note: 'Enter 0 in non-survey weeks' },
-    { key: 'surveyRespondents', label: 'Number of survey respondents', type: 'integer', badge: 'QUARTERLY', note: 'Enter 0 in non-survey weeks' }
+    { key: 'surveyRespondents', label: 'Number of survey respondents', type: 'integer', badge: 'QUARTERLY', note: 'Enter 0 in non-survey weeks' },
+    { key: 'meetingsHeldThisWeek', label: 'Team meetings held this week', type: 'integer', note: 'Target is 2 every week — enter 0, 1, or 2' },
+    { key: 'meetingsOnSchedule', label: 'Were meetings held at their regular scheduled time?', type: 'binary', note: '1 = yes (both on time) · 0 = no (missed slot or rescheduled last-minute)' },
+    { key: 'nextStepsConfirmed', label: 'Were next steps confirmed and recorded at both meetings?', type: 'binary', note: '1 = yes · 0 = no' },
+    { key: 'ideasRaisedByTeamLead', label: 'Ideas or proposals raised by team lead this week', type: 'integer', note: 'Count only ideas originating from the team lead — not directives from management' }
   ],
   impactLabs: [
     { key: 'articlesResearchStage', label: 'Articles in research stage', type: 'integer', note: 'Infographic only' },
@@ -398,7 +458,11 @@ export const TEAM_INPUT_FIELDS = {
     { key: 'jointProjectsActive', label: 'Joint research projects currently active', type: 'integer', note: 'Live count — can go up or down' },
     { key: 'coAuthoredPublicationsYTD', label: 'Co-authored publications YTD', type: 'integer', note: 'Current absolute count — only goes up' },
     { key: 'partnershipPipelineCount', label: 'Institutions in active partnership conversations (no agreement yet)', type: 'integer', note: 'Leading indicator' },
-    { key: 'grantProposalsSubmitted', label: 'Grant proposals submitted YTD (joint)', type: 'integer', note: 'Enter 0 in non-submission weeks; cumulative' }
+    { key: 'grantProposalsSubmitted', label: 'Grant proposals submitted YTD (joint)', type: 'integer', note: 'Enter 0 in non-submission weeks; cumulative' },
+    { key: 'meetingsHeldThisWeek', label: 'Team meetings held this week', type: 'integer', note: 'Target is 2 every week — enter 0, 1, or 2' },
+    { key: 'meetingsOnSchedule', label: 'Were meetings held at their regular scheduled time?', type: 'binary', note: '1 = yes (both on time) · 0 = no (missed slot or rescheduled last-minute)' },
+    { key: 'nextStepsConfirmed', label: 'Were next steps confirmed and recorded at both meetings?', type: 'binary', note: '1 = yes · 0 = no' },
+    { key: 'ideasRaisedByTeamLead', label: 'Ideas or proposals raised by team lead this week', type: 'integer', note: 'Count only ideas originating from the team lead — not directives from management' }
   ],
   businessDevelopment: [
     { key: 'revenueThisWeek', label: 'Revenue earned this week ($)', type: 'decimal', note: 'All channels combined — Shopify, Etsy, markets, wholesale, etc.' },
@@ -427,6 +491,10 @@ export const TEAM_INPUT_FIELDS = {
     { key: 'totalAttendeesYTD', label: 'Total attendees YTD (cumulative)', type: 'integer', note: 'Include this event if one occurred — only goes up' },
     { key: 'attendeeSatisfactionScore', label: 'Post-event satisfaction score (out of 5)', type: 'decimal', badge: 'EVENT-TRIGGERED', note: 'Enter 0 in non-event weeks' },
     { key: 'repeatAttendeePercentage', label: 'Repeat attendee percentage (%)', type: 'decimal', badge: 'EVENT-TRIGGERED', note: 'Enter 0 in non-event weeks' },
-    { key: 'postEventActionsPercent', label: '% of post-event actions completed', type: 'integer', badge: 'EVENT-TRIGGERED', note: 'Follow-ups sent, photos posted, feedback collected; enter 0 in non-event weeks' }
+    { key: 'postEventActionsPercent', label: '% of post-event actions completed', type: 'integer', badge: 'EVENT-TRIGGERED', note: 'Follow-ups sent, photos posted, feedback collected; enter 0 in non-event weeks' },
+    { key: 'meetingsHeldThisWeek', label: 'Team meetings held this week', type: 'integer', note: 'Target is 2 every week — enter 0, 1, or 2' },
+    { key: 'meetingsOnSchedule', label: 'Were meetings held at their regular scheduled time?', type: 'binary', note: '1 = yes (both on time) · 0 = no (missed slot or rescheduled last-minute)' },
+    { key: 'nextStepsConfirmed', label: 'Were next steps confirmed and recorded at both meetings?', type: 'binary', note: '1 = yes · 0 = no' },
+    { key: 'ideasRaisedByTeamLead', label: 'Ideas or proposals raised by team lead this week', type: 'integer', note: 'Count only ideas originating from the team lead — not directives from management' }
   ]
 };
