@@ -336,6 +336,7 @@ export const DEFAULT_WEEK_INPUTS = {
     totalRevenueYTD: 0,
     ordersThisWeek: 0,
     newCustomersThisWeek: 0,
+    repeatOrdersThisWeek: 0,
     repeatCustomersTotal: 0,
     activeChannels: 0,
     marketingSpendThisWeek: 0,
@@ -400,17 +401,18 @@ export const TEAM_INPUT_FIELDS = {
     { key: 'grantProposalsSubmitted', label: 'Grant proposals submitted YTD (joint)', type: 'integer', note: 'Enter 0 in non-submission weeks; cumulative' }
   ],
   businessDevelopment: [
-    { key: 'revenueThisWeek', label: 'Revenue earned this week ($)', type: 'decimal', note: 'All channels combined' },
-    { key: 'totalRevenueYTD', label: 'Total revenue YTD ($)', type: 'decimal', note: 'Running cumulative — update every week' },
-    { key: 'ordersThisWeek', label: 'Orders completed this week', type: 'integer', note: '' },
-    { key: 'newCustomersThisWeek', label: 'New customers acquired this week', type: 'integer', note: 'First-time buyers only' },
-    { key: 'repeatCustomersTotal', label: 'Total repeat customers to date', type: 'integer', note: 'Customers who have bought more than once — cumulative' },
-    { key: 'activeChannels', label: 'Active sales channels right now', type: 'integer', note: 'Count only live channels generating sales (Shopify, Etsy, Instagram Shop, markets, etc.)' },
-    { key: 'marketingSpendThisWeek', label: 'Marketing / acquisition spend this week ($)', type: 'decimal', note: 'Ads, promos, samples, market fees — used to calculate CAC' },
+    { key: 'revenueThisWeek', label: 'Revenue earned this week ($)', type: 'decimal', note: 'All channels combined — Shopify, Etsy, markets, wholesale, etc.' },
+    { key: 'totalRevenueYTD', label: 'Total revenue YTD ($)', type: 'decimal', note: 'Running cumulative — update every week, never goes down' },
+    { key: 'ordersThisWeek', label: 'Total orders completed this week', type: 'integer', note: 'All orders across all channels' },
+    { key: 'newCustomersThisWeek', label: 'New customers acquired this week', type: 'integer', note: 'First-time buyers only — used to calculate CAC' },
+    { key: 'repeatOrdersThisWeek', label: 'Orders from returning customers this week', type: 'integer', note: 'Customers who have purchased before — key signal for repeat base growth' },
+    { key: 'repeatCustomersTotal', label: 'Total repeat customers to date (cumulative)', type: 'integer', note: 'Count of unique customers who have bought more than once — only goes up' },
+    { key: 'activeChannels', label: 'Active sales channels right now', type: 'integer', note: 'Count only live channels generating sales (Shopify, Etsy, Instagram Shop, markets, wholesale)' },
+    { key: 'marketingSpendThisWeek', label: 'Marketing / acquisition spend this week ($)', type: 'decimal', note: 'Ads, promos, samples, market fees — used to calculate CAC; enter 0 if no spend' },
     { key: 'satisfactionScore', label: 'Average customer satisfaction score this week (0–5)', type: 'decimal', note: 'Enter 0 if no feedback collected this week' },
-    { key: 'satisfactionResponses', label: 'Number of customer feedback responses this week', type: 'integer', note: 'Enter 0 if no feedback' },
-    { key: 'partnershipsSignedTotal', label: 'Distribution partnerships signed (cumulative)', type: 'integer', note: 'Formal agreements only — only goes up' },
-    { key: 'partnershipLeads', label: 'Distribution partnership leads in active conversation', type: 'integer', note: 'Retailers, distributors, wholesalers you are actively pitching' }
+    { key: 'satisfactionResponses', label: 'Number of customer feedback responses this week', type: 'integer', note: 'Enter 0 if no feedback — weeks with 0 responses are skipped in scoring' },
+    { key: 'partnershipsSignedTotal', label: 'Distribution partnerships signed (cumulative)', type: 'integer', note: 'Formal signed agreements only — only goes up' },
+    { key: 'partnershipLeads', label: 'Distribution partnership leads in active conversation', type: 'integer', note: 'Retailers, distributors, wholesalers actively being pitched — leading indicator' }
   ],
   events: [
     { key: 'eventOccurredThisWeek', label: 'Did an event occur this week?', type: 'binary', note: '1 = yes, 0 = no — activates event-triggered fields below' },

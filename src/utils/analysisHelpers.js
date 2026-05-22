@@ -69,18 +69,25 @@ export function computeYearEndProjections(history, currentFYWeek) {
   const currentRevenue = _lastVal(bd, 'totalRevenueYTD');
   const projRevenue = Math.round(currentRevenue + _weeklyAvg(bd, 'revenueThisWeek') * rem);
   const currentRepeat = _lastVal(bd, 'repeatCustomersTotal');
+  const avgRepeatOrders = _weeklyAvg(bd, 'repeatOrdersThisWeek');
+  const projRepeat = Math.round(currentRepeat + avgRepeatOrders * rem);
   const currentChannels = _lastVal(bd, 'activeChannels');
+  const currentSigned = _lastVal(bd, 'partnershipsSignedTotal');
+  const currentLeads = _lastVal(bd, 'partnershipLeads');
   const feedbackWeeks = bd.filter(e => (e.inputs?.satisfactionResponses ?? 0) > 0);
-  const avgSatisfaction = feedbackWeeks.length
-    ? +(_weeklyAvg(feedbackWeeks, 'satisfactionScore')).toFixed(1) : null;
+  const totalWeightedScore = feedbackWeeks.reduce((s, e) => s + (e.inputs?.satisfactionScore ?? 0) * (e.inputs?.satisfactionResponses ?? 0), 0);
+  const totalResponses = feedbackWeeks.reduce((s, e) => s + (e.inputs?.satisfactionResponses ?? 0), 0);
+  const avgSatisfaction = totalResponses > 0 ? +(totalWeightedScore / totalResponses).toFixed(1) : null;
+  const bdPipelineStatus = currentSigned >= 1 || currentLeads >= 2 ? 'good' : currentLeads >= 1 ? 'risk' : 'critical';
 
   return {
     weeksRemaining: rem,
     hasData: history.length > 0,
     businessDevelopment: [
       { label: 'Revenue YTD', current: `$${currentRevenue.toLocaleString()}`, projected: `$${projRevenue.toLocaleString()}`, target: '$7,000', status: _projStatus(projRevenue, 7000) },
-      { label: 'Repeat Customers', current: currentRepeat, projected: null, target: 10, status: _projStatus(currentRepeat, 10) },
+      { label: 'Repeat Customers', current: currentRepeat, projected: projRepeat > currentRepeat ? projRepeat : null, target: 10, status: _projStatus(projRepeat > currentRepeat ? projRepeat : currentRepeat, 10) },
       { label: 'Active Channels', current: currentChannels, projected: null, target: 2, status: _projStatus(currentChannels, 2) },
+      { label: 'Partnership Pipeline', current: `${currentSigned} signed · ${currentLeads} leads`, projected: null, target: '2+ leads or 1 signed', status: bdPipelineStatus },
       ...(avgSatisfaction !== null ? [{ label: 'Satisfaction Avg', current: `${avgSatisfaction}/5`, projected: null, target: '>3.5/5', status: avgSatisfaction >= 3.5 ? 'good' : avgSatisfaction >= 3.0 ? 'risk' : 'critical' }] : []),
     ],
     marketing: [

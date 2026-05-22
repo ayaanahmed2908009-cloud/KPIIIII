@@ -270,13 +270,51 @@ For each KPI across all four teams, calculate the probability (0–100%) that th
 If fewer than 4 weeks of real FY data exist (week number ≥ 1), set low_confidence to true.
 
 BUSINESS DEVELOPMENT TEAM — SPECIAL ASSESSMENT RULES:
-This team uses e-commerce to generate revenue (Shopify, Etsy, Instagram Shop, local markets, wholesale, etc.).
-- Revenue is cumulative — project totalRevenueYTD forward using average weekly revenueThisWeek pace.
-- CAC KPI: score is based on TRACKING CONSISTENCY, not the actual CAC value. If both marketingSpendThisWeek and newCustomersThisWeek are submitted (non-zero) in most weeks, score high (75–90). If one or both are missing regularly, score low. CAC = marketingSpendThisWeek / newCustomersThisWeek — compute and mention it.
-- Repeat customers: cumulative metric — repeatCustomersTotal only goes up. Project toward 10.
-- Customer satisfaction: skip weeks where satisfactionResponses = 0. Only average weeks with real feedback. A team with 3 good feedback weeks is scored well even if many weeks have no responses.
-- Distribution partnerships: partnershipsSignedTotal is cumulative. partnershipLeads is a leading indicator. For Year 1, a pipeline of 2+ active leads counts as on track even with 0 signed.
-- Active channels: reward increases. 0 channels = critical. 1 = at risk. 2+ = on track.
+This team sells solar products via e-commerce and direct channels (Shopify, Etsy, Instagram Shop, local markets, wholesale).
+
+REVENUE (annualRevenue KPI):
+- totalRevenueYTD is the authoritative cumulative figure. Weekly pace = average of all non-zero revenueThisWeek values.
+- Projected year-end = totalRevenueYTD + (avgWeeklyRevenue × weeksRemaining). Target = $7,000.
+- Projected ≥ $7,000: on track (75–90). Projected ≥ $5,250: at risk (55–70). Below that: critical (30–50).
+- Early year (weeks 1–10): any recorded revenue = optimistic (60–80). Zero revenue across 3+ submitted weeks = at risk.
+- Always state the projected year-end revenue figure in your rationale.
+
+ACTIVE SALES CHANNELS (activeSalesChannels KPI):
+- activeChannels is a snapshot (not cumulative). Target = 2 by year end.
+- 0 channels = critical (30–45). 1 channel = at risk (50–65). 2+ channels = on track (75–90).
+- Reward week-over-week increases. Penalise week-over-week decreases.
+
+REPEAT CUSTOMER BASE (repeatCustomers KPI):
+- repeatCustomersTotal is cumulative — only goes up. Target = 10 by year end.
+- repeatOrdersThisWeek is the weekly growth signal — use the average to project forward.
+- If repeatOrdersThisWeek is missing/sparse, use the weekly change in repeatCustomersTotal as fallback.
+- Projected repeats = repeatCustomersTotal + (avg weekly new repeats × weeksRemaining).
+- 0 repeat customers after 8+ weeks = critical. 1–4 = at risk unless strong pace. 5+ or strong trajectory = on track.
+- Always state current count vs target 10 and the projected year-end figure.
+
+CUSTOMER ACQUISITION COST — CAC (customerAcquisitionCost KPI):
+- Year 1 goal is TRACKING CONSISTENCY — not a specific CAC value. Score on data quality, not the number.
+- Count weeks where BOTH marketingSpendThisWeek AND newCustomersThisWeek are non-zero.
+- ≥80% of submitted weeks with both fields: on track (75–90). 50–79%: at risk (55–70). <50%: critical (30–50).
+- If neither field has ever been non-zero: critical (25–40). Flag low_confidence = true.
+- Compute actual CAC = spend / new customers for qualifying weeks and mention it in the rationale.
+
+CUSTOMER SATISFACTION (customerSatisfaction KPI):
+- SKIP all weeks where satisfactionResponses = 0. Score only weeks with real feedback.
+- Weighted average = Σ(satisfactionScore × satisfactionResponses) / Σ(satisfactionResponses).
+- No feedback weeks yet: neutral (60), low_confidence = true — do not penalise.
+- Year 1 target = positive feedback collected (any sustained average ≥ 3.0/5 qualifies).
+- ≥ 3.5/5 weighted average: on track. 2.5–3.4/5: at risk. < 2.5/5 or declining trend: critical.
+- Always state the weighted average score and total responses collected in the rationale.
+
+DISTRIBUTION PARTNERSHIPS (distributionPartnerships KPI):
+- Year 1 goal: pipeline established — 2+ active leads (partnershipLeads) OR 1+ signed agreement.
+- partnershipsSignedTotal is cumulative. 0 signed is fine in Year 1 if pipeline ≥ 2.
+- partnershipLeads ≥ 2 and/or partnershipsSignedTotal ≥ 1: on track (70–85).
+- partnershipLeads = 1 and partnershipsSignedTotal = 0: at risk (50–65).
+- partnershipLeads = 0 and partnershipsSignedTotal = 0: critical (25–45).
+- Any signed partnership boosts probability by 10–15 points regardless of pipeline count.
+- Always state signed count and active leads count in the rationale.
 
 TEAM ADVICE RULES (for teamAdvice field):
 - Write 3–5 bullet points addressed directly to the team lead ("you", "your team").
