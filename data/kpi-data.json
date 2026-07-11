@@ -1,0 +1,28 @@
+{
+  "history": [
+    {
+      "team": "marketing",
+      "weekNumber": 2,
+      "date": "2026-04-10T17:00:00.000Z",
+      "inputs": {
+        "totalFollowers": 1920,
+        "newFollowers": 73,
+        "engagementRate": 4.2,
+        "postsPublished": 6,
+        "videosPublished": 3,
+        "pressOutreach": 4,
+        "pressConfirmed": 1,
+        "selfAssessedScore": 72
+      }
+    },
+    {
+      "team": "impactLabs",
+      "weekNumber": 15,
+      "date": "2026-07-11T00:00:00.000Z",
+      "inputs": {
+        "annualReportPercentComplete": 100
+      }
+    }
+  ],
+  "analyses": []
+}

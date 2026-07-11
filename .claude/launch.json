@@ -2,10 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "solarpak-kpi",
+      "name": "solarpak-client",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "client"],
       "port": 3000
+    },
+    {
+      "name": "solarpak-server",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["PORT=3001", "node", "server.js"],
+      "port": 3001
     }
   ]
 }
